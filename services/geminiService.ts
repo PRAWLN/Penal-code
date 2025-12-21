@@ -2,9 +2,6 @@ import { GoogleGenAI, Type } from "@google/genai";
 import { PENAL_CODE } from "../data/penalCode";
 import { AiAnalysisResult } from "../types";
 
-// Initialize Gemini
-const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
-
 // Create a simplified list of codes for the prompt to save tokens and context
 const penalCodeSummary = PENAL_CODE.map(c => `${c.id}: ${c.code} ${c.title} (${c.description})`).join('\n');
 
@@ -12,6 +9,9 @@ export const analyzeScenarioWithGemini = async (narrative: string): Promise<AiAn
   if (!narrative.trim()) {
     throw new Error("Narrative cannot be empty");
   }
+
+  // Initialize Gemini inside the function to ensure up-to-date API key
+  const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
 
   const prompt = `
     You are a Field Training Officer for the Los Santos Police Department.
@@ -31,8 +31,9 @@ export const analyzeScenarioWithGemini = async (narrative: string): Promise<AiAn
   `;
 
   try {
+    // Use gemini-3-flash-preview for text analysis tasks as per guidelines
     const response = await ai.models.generateContent({
-      model: "gemini-2.5-flash",
+      model: "gemini-3-flash-preview",
       contents: prompt,
       config: {
         responseMimeType: "application/json",

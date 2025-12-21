@@ -25,53 +25,51 @@ export enum FleeingType {
 
 export type ShotsFiredVictim = 'none' | 'local' | 'civilian' | 'govt' | 'animal';
 
+// Added AiAnalysisResult interface to fix the missing export error
+export interface AiAnalysisResult {
+  suggestedChargeIds: string[];
+  reasoning: string;
+}
+
 export interface ScenarioState {
   incidentType: string[];
   fleeing: FleeingType;
   suspectDriver: 'yes' | 'no' | 'mixed' | null;
-  recklessEvasionDamage: boolean; // New field for Reckless Evading logic
+  recklessEvasionDamage: boolean;
   customNarrative: string;
   driverSpeed: number | '';
   speedLimit: 75 | 90;
   trafficVehicleDestroyed: boolean | null;
   
-  // New Vehicle Swap Logic
   vehicleSwaps: boolean;
-  stolenRecovered: number | ''; // Joyriding counts (Single Role)
-  stolenDestroyed: number | ''; // GTA counts (Single Role)
+  stolenRecovered: number | ''; 
+  stolenDestroyed: number | ''; 
 
-  // Mixed Role Vehicle Theft Counts
   vehicleTheftPrincipalRecovered: number | '';
   vehicleTheftPrincipalDestroyed: number | '';
   vehicleTheftAccessoryRecovered: number | '';
   vehicleTheftAccessoryDestroyed: number | '';
 
-  // Shots Fired Logic
   shotsFiredVictim: ShotsFiredVictim;
   shotsFiredVictimCount: number | '';
-  shotsFiredGovtActive: boolean; // "In active scene / On duty?"
+  shotsFiredGovtActive: boolean;
   shotsFiredRole: 'principal' | 'accessory';
 
-  // Hostage Logic
   hostageCount: number | '';
   hasHostages: boolean;
   
-  // Robbery Logic
   robberyInjury: boolean;
-  robberyStolenGoods: boolean; // New field for Robbery Principal vs Accessory
-  warehouseStolenGoods: boolean; // New field for Warehouse Robbery
-  humaneLabsStolenGoods: boolean; // New field for Humane Labs Robbery
+  robberyStolenGoods: boolean;
+  warehouseStolenGoods: boolean;
+  humaneLabsStolenGoods: boolean;
 
-  // --- NEW FIELDS ---
-  // Officer Safety
-  officerAttack: boolean; // Master Switch
-  officerAttackGSR: boolean; // Witnessed / GSR Positive -> Principal vs Accessory
+  officerAttack: boolean;
+  officerAttackGSR: boolean;
   
-  officerAttackCountWeapon: number | ''; // Aggravated Assault
-  officerAttackCountNoWeapon: number | ''; // Assault & Battery
-  officerAttackCountTargeted: number | ''; // Assault on Govt Official
+  officerAttackCountWeapon: number | '';
+  officerAttackCountNoWeapon: number | '';
+  officerAttackCountTargeted: number | '';
 
-  // Drugs
   drugsFound: boolean;
   drugMarijuanaJoints: number | '';
   drugMarijuanaPlants: number | '';
@@ -81,21 +79,17 @@ export interface ScenarioState {
   drugMethBricks: number | '';
   drugOxyCount: number | '';
   
-  // Weapon Possession (Simple possession, not use)
   weaponPossessionClass1: boolean;
   weaponPossessionClass2: boolean;
   weaponPossessionClass3: boolean;
   
-  // Government Equipment
   governmentEquipmentPossession: boolean;
 
-  // Fishing
   fishingViolation: boolean;
   fishingHasLicense: boolean;
-  fishingOffenseNumber: 1 | 2 | 3; // 1 = 1st Offense, etc.
-  fishingContainerViolation: boolean; // Improper container or over limit
+  fishingOffenseNumber: 1 | 2 | 3;
+  fishingContainerViolation: boolean;
 
-  // Hunting
   huntingViolation: boolean;
   huntingInZone: boolean;
   huntingHasLicense: boolean;
@@ -103,14 +97,6 @@ export interface ScenarioState {
   huntingProtectedSpecies: boolean;
   huntingMeatCount: number | '';
 
-  // Tickets
-  unpaidTicketDays: number | ''; // Days overdue
-
-  // Littering
-  litteringRepeated: boolean; // 5th+ violation
-}
-
-export interface AiAnalysisResult {
-  suggestedChargeIds: string[];
-  reasoning: string;
+  unpaidTicketDays: number | '';
+  litteringRepeated: boolean;
 }
