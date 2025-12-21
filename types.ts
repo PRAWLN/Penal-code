@@ -40,11 +40,13 @@ export interface ScenarioState {
   driverSpeed: number | '';
   speedLimit: 75 | 90;
   trafficVehicleDestroyed: boolean | null;
+  boostVehicleDestroyed: boolean | null;
   
   vehicleSwaps: boolean;
   stolenRecovered: number | ''; 
   stolenDestroyed: number | ''; 
 
+  // Mixed Role Vehicle Theft Counts
   vehicleTheftPrincipalRecovered: number | '';
   vehicleTheftPrincipalDestroyed: number | '';
   vehicleTheftAccessoryRecovered: number | '';

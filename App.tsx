@@ -21,6 +21,7 @@ export default function App() {
     driverSpeed: '',
     speedLimit: 75,
     trafficVehicleDestroyed: null,
+    boostVehicleDestroyed: null,
     vehicleSwaps: false,
     stolenRecovered: '',
     stolenDestroyed: '',
@@ -77,6 +78,7 @@ export default function App() {
     };
     const incidents = scenarioState.incidentType;
 
+    // 1. Fleeing & Resisting
     if (scenarioState.fleeing === FleeingType.FOOT) {
       add('resisting_arrest_principal'); 
     } else if (scenarioState.fleeing === FleeingType.VEHICLE) {
@@ -95,6 +97,7 @@ export default function App() {
        add('negligent_driving_principal');
     }
 
+    // 2. Traffic
     if (incidents.includes('traffic_speeding')) {
        const speed = typeof scenarioState.driverSpeed === 'number' ? scenarioState.driverSpeed : 0;
        const limit = scenarioState.speedLimit;
@@ -112,6 +115,7 @@ export default function App() {
     if (incidents.includes('traffic_no_license')) add('driving_without_a_license_principal');
     if (incidents.includes('traffic_disobey')) add('disobeying_traffic_control_device_principal');
 
+    // 3. Consolidated Vehicle Theft Logic (Boost, Traffic Joyriding, Swaps)
     if (scenarioState.suspectDriver === 'mixed') {
         const joyPrin = typeof scenarioState.vehicleTheftPrincipalRecovered === 'number' ? scenarioState.vehicleTheftPrincipalRecovered : 0;
         const gtaPrin = typeof scenarioState.vehicleTheftPrincipalDestroyed === 'number' ? scenarioState.vehicleTheftPrincipalDestroyed : 0;
@@ -123,17 +127,32 @@ export default function App() {
         if (gtaAcc > 0) add('grand_theft_auto_accessory', gtaAcc);
     } else {
         let joyridingCount = 0;
-        if (incidents.includes('traffic_joyriding') && scenarioState.trafficVehicleDestroyed === false) joyridingCount += 1;
-        if (scenarioState.vehicleSwaps && typeof scenarioState.stolenRecovered === 'number') joyridingCount += scenarioState.stolenRecovered;
         let gtaCount = 0;
-        if (incidents.includes('traffic_joyriding') && scenarioState.trafficVehicleDestroyed === true) gtaCount += 1;
-        if (incidents.includes('boost')) gtaCount += 1;
-        if (scenarioState.vehicleSwaps && typeof scenarioState.stolenDestroyed === 'number') gtaCount += scenarioState.stolenDestroyed;
+
+        // Boost logic: Recovered -> Joyriding, Destroyed -> GTA
+        if (incidents.includes('boost')) {
+           if (scenarioState.boostVehicleDestroyed === false) joyridingCount += 1;
+           else if (scenarioState.boostVehicleDestroyed === true) gtaCount += 1;
+        }
+
+        // Traffic Joyriding logic
+        if (incidents.includes('traffic_joyriding')) {
+            if (scenarioState.trafficVehicleDestroyed === false) joyridingCount += 1;
+            else if (scenarioState.trafficVehicleDestroyed === true) gtaCount += 1;
+        }
+
+        // Vehicle Swaps logic
+        if (scenarioState.vehicleSwaps) {
+            if (typeof scenarioState.stolenRecovered === 'number') joyridingCount += scenarioState.stolenRecovered;
+            if (typeof scenarioState.stolenDestroyed === 'number') gtaCount += scenarioState.stolenDestroyed;
+        }
+
         const vehicleTheftRole = scenarioState.suspectDriver === 'no' ? 'accessory' : 'principal';
         if (joyridingCount > 0) add(`joyriding_${vehicleTheftRole}`, joyridingCount);
         if (gtaCount > 0) add(`grand_theft_auto_${vehicleTheftRole}`, gtaCount);
     }
 
+    // 4. Weapons & Shots Fired
     if (incidents.includes('shots_fired')) {
        const victim = scenarioState.shotsFiredVictim;
        const role = scenarioState.shotsFiredRole;
@@ -161,6 +180,7 @@ export default function App() {
     if (scenarioState.weaponPossessionClass3) add('criminal_possession_of_a_firearm_class_3_principal');
     if (scenarioState.governmentEquipmentPossession) add('possession_of_government_equipment_principal');
 
+    // 5. Robberies
     if (incidents.includes('warehouse_robbery')) {
         if (scenarioState.warehouseStolenGoods) add('aggravated_robbery_principal');
         else add('aggravated_robbery_accessory');
@@ -189,6 +209,7 @@ export default function App() {
         else add('littering_principal_2');
     }
 
+    // 6. Drugs
     if (scenarioState.drugsFound) {
         const mjJoints = typeof scenarioState.drugMarijuanaJoints === 'number' ? scenarioState.drugMarijuanaJoints : 0;
         const mjPlants = typeof scenarioState.drugMarijuanaPlants === 'number' ? scenarioState.drugMarijuanaPlants : 0;
@@ -219,6 +240,7 @@ export default function App() {
         else if (oxy >= 1) add('possession_of_controlled_substance_oxy_principal_3');
     }
 
+    // 7. Fishing & Hunting
     if (incidents.includes('fishing_hunting') && scenarioState.fishingViolation) {
         if (!scenarioState.fishingHasLicense) {
             if (scenarioState.fishingOffenseNumber === 3) add('fishing_without_a_license_principal_1');
@@ -238,6 +260,7 @@ export default function App() {
         else if (meat >= 41) add('hunting_over_limits_principal_3');
     }
 
+    // 8. Civil & Other
     if (typeof scenarioState.unpaidTicketDays === 'number') {
         if (scenarioState.unpaidTicketDays >= 15) add('failure_to_pay_tickets_principal_1');
         else if (scenarioState.unpaidTicketDays >= 7) add('failure_to_pay_tickets_principal_2');
