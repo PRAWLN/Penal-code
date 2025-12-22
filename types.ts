@@ -25,7 +25,6 @@ export enum FleeingType {
 
 export type ShotsFiredVictim = 'none' | 'local' | 'civilian' | 'govt' | 'animal';
 
-// Added AiAnalysisResult interface to fix the missing export error
 export interface AiAnalysisResult {
   suggestedChargeIds: string[];
   reasoning: string;
@@ -59,6 +58,7 @@ export interface ScenarioState {
 
   hostageCount: number | '';
   hasHostages: boolean;
+  hostageRole: 'principal' | 'accessory';
   
   robberyInjury: boolean;
   robberyStolenGoods: boolean;
@@ -90,7 +90,9 @@ export interface ScenarioState {
   fishingViolation: boolean;
   fishingHasLicense: boolean;
   fishingOffenseNumber: 1 | 2 | 3;
-  fishingContainerViolation: boolean;
+  fishLivePossession: boolean;
+  fishInApprovedContainer: boolean;
+  activelyFishing: boolean;
 
   huntingViolation: boolean;
   huntingInZone: boolean;
@@ -101,4 +103,5 @@ export interface ScenarioState {
 
   unpaidTicketDays: number | '';
   litteringRepeated: boolean;
+  litteringItemCount: number | '';
 }

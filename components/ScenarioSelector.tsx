@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { FleeingType, ScenarioState } from '../types';
-import { Car, User, AlertTriangle, Siren, RefreshCcw, Briefcase, Ticket, ShieldAlert } from 'lucide-react';
+import { Car, User, AlertTriangle, Siren, RefreshCcw, Briefcase, Ticket, ShieldAlert, Gauge, PackageSearch, Info, Target, Users, Fish, Trash2 } from 'lucide-react';
 
 interface ScenarioSelectorProps {
   scenarioState: ScenarioState;
@@ -62,12 +62,18 @@ export const ScenarioSelector: React.FC<ScenarioSelectorProps> = ({
         update.shotsFiredRole = 'principal';
       }
       
-      if (id === 'littering') update.litteringRepeated = false;
+      if (id === 'littering') {
+          update.litteringRepeated = false;
+          update.litteringItemCount = '';
+      }
 
       if (id === 'fishing_hunting') {
           update.fishingViolation = false;
           update.huntingViolation = false;
           update.huntingMeatCount = '';
+          update.fishLivePossession = false;
+          update.fishInApprovedContainer = true;
+          update.activelyFishing = true;
       }
 
       const alarmIds = ['money_loan', 'comic_store', 'pdm_alarm', 'break_and_enter'];
@@ -121,6 +127,8 @@ export const ScenarioSelector: React.FC<ScenarioSelectorProps> = ({
           update.humaneLabsStolenGoods = true;
           update.robberyStolenGoods = true;
           update.boostVehicleDestroyed = null;
+          update.hasHostages = false;
+          update.hostageCount = '';
       }
 
       update.incidentType = nextIncidents;
@@ -146,6 +154,15 @@ export const ScenarioSelector: React.FC<ScenarioSelectorProps> = ({
     onUpdate(update);
   };
 
+  const handleVehicleSwapsChange = (val: boolean) => {
+    const update: Partial<ScenarioState> = { vehicleSwaps: val };
+    if (!val) {
+      update.stolenRecovered = '';
+      update.stolenDestroyed = '';
+    }
+    onUpdate(update);
+  };
+
   const handleRoleChange = (role: 'no' | 'yes' | 'mixed') => {
     const update: Partial<ScenarioState> = { suspectDriver: role };
     if (role === 'mixed' && scenarioState.fleeing !== FleeingType.VEHICLE) {
@@ -154,22 +171,14 @@ export const ScenarioSelector: React.FC<ScenarioSelectorProps> = ({
     onUpdate(update);
   };
 
-  const handleVehicleSwapsChange = (hasSwaps: boolean) => {
-    const update: Partial<ScenarioState> = { vehicleSwaps: hasSwaps };
-    if (hasSwaps && scenarioState.fleeing !== FleeingType.VEHICLE) {
-      update.fleeing = FleeingType.VEHICLE;
-    }
-    if (!hasSwaps) {
-      update.stolenRecovered = '';
-      update.stolenDestroyed = '';
-    }
-    onUpdate(update);
-  };
+  const hostageIncidents = ['money_loan', 'pdm_alarm', 'warehouse_robbery', 'comic_store', 'break_and_enter', 'drug_trafficking_incident', 'humane_labs', 'air_drops'];
+  const showHostageSection = scenarioState.incidentType.some(it => hostageIncidents.includes(it));
 
   const hasActiveIncidents = scenarioState.incidentType.length > 0;
   const vehicleCrimes = ['boost', 'traffic_joyriding'];
   const hasVehicleCrime = scenarioState.incidentType.some(it => vehicleCrimes.includes(it));
   const showRoleSection = hasVehicleCrime || scenarioState.fleeing === FleeingType.VEHICLE;
+  const isRoleMissing = showRoleSection && scenarioState.suspectDriver === null;
 
   return (
     <div className="flex flex-col h-full space-y-6">
@@ -204,6 +213,281 @@ export const ScenarioSelector: React.FC<ScenarioSelectorProps> = ({
           </div>
         </div>
 
+        {/* Littering Details Card */}
+        {scenarioState.incidentType.includes('littering') && (
+          <div className="mt-4 p-4 bg-slate-800/50 rounded-lg border border-slate-700 animate-in fade-in slide-in-from-top-2 space-y-4">
+             <h4 className="text-sm font-semibold text-blue-400 flex items-center gap-2">
+              <Trash2 size={16} /> Littering Violation
+            </h4>
+            
+            <div className="space-y-3">
+              <div className="flex items-center justify-between">
+                <span className="text-xs text-slate-300">Littering Violation History</span>
+                <div className="flex bg-slate-900 rounded p-0.5 border border-slate-700">
+                  <button onClick={() => onUpdate({ litteringRepeated: false })} className={`px-3 py-1 text-[10px] font-bold rounded transition-all ${!scenarioState.litteringRepeated ? 'bg-slate-700 text-white shadow-sm' : 'text-slate-500 hover:text-slate-400'}`}>Under 5</button>
+                  <button onClick={() => onUpdate({ litteringRepeated: true })} className={`px-3 py-1 text-[10px] font-bold rounded transition-all ${scenarioState.litteringRepeated ? 'bg-red-600 text-white shadow-sm' : 'text-slate-500 hover:text-slate-400'}`}>5+</button>
+                </div>
+              </div>
+
+              <div className="flex items-center justify-between">
+                <label className="text-xs text-slate-300">Items Littered (Max 5 items fine cap)</label>
+                <input 
+                  type="number" 
+                  min="1"
+                  placeholder="0" 
+                  className="w-20 bg-slate-900 border border-slate-600 rounded px-2 py-1.5 text-xs text-white outline-none focus:border-blue-500" 
+                  value={scenarioState.litteringItemCount} 
+                  onChange={e => onUpdate({ litteringItemCount: e.target.value === '' ? '' : parseInt(e.target.value) })} 
+                />
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Fishing & Hunting Details Card */}
+        {scenarioState.incidentType.includes('fishing_hunting') && (
+          <div className="mt-4 p-4 bg-slate-800/50 rounded-lg border border-slate-700 animate-in fade-in slide-in-from-top-2 space-y-4">
+             <h4 className="text-sm font-semibold text-blue-400 flex items-center gap-2">
+              <Fish size={16} /> Wildlife Violations
+            </h4>
+            
+            <div className="flex gap-2 mb-4">
+              <button 
+                onClick={() => onUpdate({ fishingViolation: !scenarioState.fishingViolation })}
+                className={`flex-1 py-2 text-[10px] font-bold rounded border transition-all ${scenarioState.fishingViolation ? 'bg-blue-600 border-blue-400 text-white shadow-md' : 'bg-slate-900 border-slate-700 text-slate-500 hover:text-slate-400'}`}
+              >Fishing</button>
+              <button 
+                onClick={() => onUpdate({ huntingViolation: !scenarioState.huntingViolation })}
+                className={`flex-1 py-2 text-[10px] font-bold rounded border transition-all ${scenarioState.huntingViolation ? 'bg-orange-600 border-orange-400 text-white shadow-md' : 'bg-slate-900 border-slate-700 text-slate-500 hover:text-slate-400'}`}
+              >Hunting</button>
+            </div>
+
+            {scenarioState.fishingViolation && (
+              <div className="p-3 bg-slate-900/40 rounded border border-slate-700 space-y-3 animate-in zoom-in-95">
+                <span className="text-[10px] text-blue-400 uppercase font-bold tracking-wider">Fishing Details</span>
+                <div className="flex items-center justify-between">
+                  <span className="text-xs text-slate-400">Has License?</span>
+                  <div className="flex bg-slate-800 rounded p-0.5 border border-slate-700">
+                    <button onClick={() => onUpdate({ fishingHasLicense: true })} className={`px-3 py-1 text-[10px] font-bold rounded transition-all ${scenarioState.fishingHasLicense ? 'bg-blue-600 text-white' : 'text-slate-500'}`}>Yes</button>
+                    <button onClick={() => onUpdate({ fishingHasLicense: false })} className={`px-3 py-1 text-[10px] font-bold rounded transition-all ${!scenarioState.fishingHasLicense ? 'bg-slate-700 text-white' : 'text-slate-500'}`}>No</button>
+                  </div>
+                </div>
+                {!scenarioState.fishingHasLicense && (
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs text-slate-400">Offense Number</span>
+                    <div className="flex bg-slate-800 rounded p-0.5 border border-slate-700">
+                      {[1, 2, 3].map(n => (
+                        <button key={n} onClick={() => onUpdate({ fishingOffenseNumber: n as any })} className={`px-2.5 py-1 text-[10px] font-bold rounded transition-all ${scenarioState.fishingOffenseNumber === n ? 'bg-blue-600 text-white' : 'text-slate-500'}`}>{n === 3 ? '3+' : n}</button>
+                      ))}
+                    </div>
+                  </div>
+                )}
+                
+                {/* Illegal Fish Handling Diagnostic - Non-Vehicle Possession */}
+                <div className="pt-2 mt-2 border-t border-slate-800 space-y-3">
+                   <span className="text-[9px] text-slate-500 uppercase font-black tracking-widest block mb-1">Handling & Possession Diagnostic</span>
+                   
+                   <div className="flex items-center justify-between">
+                    <span className="text-[11px] text-slate-300">Found with live fish?</span>
+                    <div className="flex bg-slate-800 rounded p-0.5 border border-slate-700">
+                      <button onClick={() => onUpdate({ fishLivePossession: true })} className={`px-3 py-1 text-[10px] font-bold rounded transition-all ${scenarioState.fishLivePossession ? 'bg-blue-600 text-white' : 'text-slate-500'}`}>Yes</button>
+                      <button onClick={() => onUpdate({ fishLivePossession: false })} className={`px-3 py-1 text-[10px] font-bold rounded transition-all ${!scenarioState.fishLivePossession ? 'bg-slate-700 text-white' : 'text-slate-500'}`}>No</button>
+                    </div>
+                  </div>
+
+                  <div className="flex items-center justify-between">
+                    <span className="text-[11px] text-slate-300">In approved cooler?</span>
+                    <div className="flex bg-slate-800 rounded p-0.5 border border-slate-700">
+                      <button onClick={() => onUpdate({ fishInApprovedContainer: true })} className={`px-3 py-1 text-[10px] font-bold rounded transition-all ${scenarioState.fishInApprovedContainer ? 'bg-blue-600 text-white' : 'text-slate-500'}`}>Yes</button>
+                      <button onClick={() => onUpdate({ fishInApprovedContainer: false })} className={`px-3 py-1 text-[10px] font-bold rounded transition-all ${!scenarioState.fishInApprovedContainer ? 'bg-slate-700 text-white' : 'text-slate-500'}`}>No</button>
+                    </div>
+                  </div>
+
+                  <div className="flex items-center justify-between">
+                    <span className="text-[11px] text-slate-300">Actively fishing?</span>
+                    <div className="flex bg-slate-800 rounded p-0.5 border border-slate-700">
+                      <button onClick={() => onUpdate({ activelyFishing: true })} className={`px-3 py-1 text-[10px] font-bold rounded transition-all ${scenarioState.activelyFishing ? 'bg-blue-600 text-white' : 'text-slate-500'}`}>Yes</button>
+                      <button onClick={() => onUpdate({ activelyFishing: false })} className={`px-3 py-1 text-[10px] font-bold rounded transition-all ${!scenarioState.activelyFishing ? 'bg-slate-700 text-white' : 'text-slate-500'}`}>No</button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {scenarioState.huntingViolation && (
+              <div className="p-3 bg-slate-900/40 rounded border border-slate-700 space-y-3 animate-in zoom-in-95">
+                <span className="text-[10px] text-orange-400 uppercase font-bold tracking-wider">Hunting Details</span>
+                <div className="flex items-center justify-between">
+                  <span className="text-xs text-slate-400">In Hunting Zone?</span>
+                  <div className="flex bg-slate-800 rounded p-0.5 border border-slate-700">
+                    <button onClick={() => onUpdate({ huntingInZone: true })} className={`px-3 py-1 text-[10px] font-bold rounded transition-all ${scenarioState.huntingInZone ? 'bg-green-600 text-white shadow-sm' : 'text-slate-500'}`}>In Zone</button>
+                    <button onClick={() => onUpdate({ huntingInZone: false })} className={`px-3 py-1 text-[10px] font-bold rounded transition-all ${!scenarioState.huntingInZone ? 'bg-red-700 text-white shadow-sm' : 'text-slate-500'}`}>Outside</button>
+                  </div>
+                </div>
+                <div className="flex items-center justify-between">
+                  <span className="text-xs text-slate-400">Valid License?</span>
+                  <div className="flex bg-slate-800 rounded p-0.5 border border-slate-700">
+                    <button onClick={() => onUpdate({ huntingHasLicense: true })} className={`px-3 py-1 text-[10px] font-bold rounded transition-all ${scenarioState.huntingHasLicense ? 'bg-blue-600 text-white shadow-sm' : 'text-slate-500'}`}>Yes</button>
+                    <button onClick={() => onUpdate({ huntingHasLicense: false })} className={`px-3 py-1 text-[10px] font-bold rounded transition-all ${!scenarioState.huntingHasLicense ? 'bg-slate-700 text-white shadow-sm' : 'text-slate-500'}`}>No</button>
+                  </div>
+                </div>
+                <div className="flex items-center justify-between">
+                  <span className="text-xs text-slate-400">Proper Firearm?</span>
+                  <div className="flex bg-slate-800 rounded p-0.5 border border-slate-700">
+                    <button onClick={() => onUpdate({ huntingProperWeapon: true })} className={`px-3 py-1 text-[10px] font-bold rounded transition-all ${scenarioState.huntingProperWeapon ? 'bg-blue-600 text-white shadow-sm' : 'text-slate-500'}`}>Yes</button>
+                    <button onClick={() => onUpdate({ huntingProperWeapon: false })} className={`px-3 py-1 text-[10px] font-bold rounded transition-all ${!scenarioState.huntingProperWeapon ? 'bg-slate-700 text-white shadow-sm' : 'text-slate-500'}`}>No</button>
+                  </div>
+                </div>
+                <div className="flex items-center justify-between">
+                  <span className="text-xs text-slate-400">Protected Species?</span>
+                  <div className="flex bg-slate-800 rounded p-0.5 border border-slate-700">
+                    <button onClick={() => onUpdate({ huntingProtectedSpecies: true })} className={`px-3 py-1 text-[10px] font-bold rounded transition-all ${scenarioState.huntingProtectedSpecies ? 'bg-red-600 text-white shadow-sm' : 'text-slate-500'}`}>Yes</button>
+                    <button onClick={() => onUpdate({ huntingProtectedSpecies: false })} className={`px-3 py-1 text-[10px] font-bold rounded transition-all ${!scenarioState.huntingProtectedSpecies ? 'bg-slate-700 text-white shadow-sm' : 'text-slate-500'}`}>No</button>
+                  </div>
+                </div>
+                <div className="flex items-center justify-between">
+                  <label className="text-xs text-slate-400">Meat Count</label>
+                  <input 
+                    type="number" 
+                    placeholder="0" 
+                    className="w-20 bg-slate-800 border border-slate-600 rounded px-2 py-1.5 text-xs text-white" 
+                    value={scenarioState.huntingMeatCount} 
+                    onChange={e => onUpdate({ huntingMeatCount: e.target.value === '' ? '' : parseInt(e.target.value) })} 
+                  />
+                </div>
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* Hostage Situation Card */}
+        {showHostageSection && (
+          <div className="mt-4 p-4 bg-slate-800/50 rounded-lg border border-slate-700 animate-in fade-in slide-in-from-top-2 space-y-4">
+             <h4 className="text-sm font-semibold text-blue-400 flex items-center gap-2">
+              <Users size={16} /> Hostage Information
+            </h4>
+            <div className="flex items-center justify-between mb-2">
+               <span className="text-xs text-slate-300">Any hostages taken?</span>
+               <div className="flex bg-slate-900 rounded p-0.5 border border-slate-700">
+                  <button onClick={() => onUpdate({ hasHostages: true })} className={`px-3 py-1 text-[10px] font-bold rounded transition-all ${scenarioState.hasHostages ? 'bg-blue-600 text-white shadow-sm' : 'text-slate-500 hover:text-slate-400'}`}>Yes</button>
+                  <button onClick={() => onUpdate({ hasHostages: false, hostageCount: '' })} className={`px-3 py-1 text-[10px] font-bold rounded transition-all ${!scenarioState.hasHostages ? 'bg-slate-700 text-white shadow-sm' : 'text-slate-500 hover:text-slate-400'}`}>No</button>
+               </div>
+            </div>
+
+            {scenarioState.hasHostages && (
+              <div className="space-y-4 animate-in zoom-in-95">
+                <div className="flex items-center justify-between">
+                   <label className="text-[10px] text-slate-400 uppercase font-bold">Hostage Count</label>
+                   <input 
+                     type="number" 
+                     min="1" 
+                     placeholder="0" 
+                     className="w-20 bg-slate-900 border border-slate-600 rounded px-2 py-1.5 text-xs text-white outline-none focus:border-blue-500"
+                     value={scenarioState.hostageCount}
+                     onChange={(e) => onUpdate({hostageCount: e.target.value === '' ? '' : parseInt(e.target.value)})}
+                   />
+                </div>
+                <div>
+                   <label className="text-[10px] text-slate-400 uppercase font-bold block mb-2">Suspect's Interaction</label>
+                   <div className="flex gap-2">
+                      <button 
+                        onClick={() => onUpdate({ hostageRole: 'principal' })} 
+                        className={`flex-1 py-1.5 text-[10px] font-bold rounded border transition-all ${scenarioState.hostageRole === 'principal' ? 'bg-blue-600 border-blue-400 text-white' : 'bg-slate-900 text-slate-500 border-slate-700'}`}
+                      >Held Hostage (Principal)</button>
+                      <button 
+                        onClick={() => onUpdate({ hostageRole: 'accessory' })} 
+                        className={`flex-1 py-1.5 text-[10px] font-bold rounded border transition-all ${scenarioState.hostageRole === 'accessory' ? 'bg-slate-700 border-slate-600 text-slate-300' : 'bg-slate-900 text-slate-500 border-slate-700'}`}
+                      >At Scene (Accessory)</button>
+                   </div>
+                </div>
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* Drug Trafficking Details */}
+        {scenarioState.incidentType.includes('drug_trafficking_incident') && (
+          <div className="mt-4 p-4 bg-slate-800/50 rounded-lg border border-slate-700 animate-in fade-in slide-in-from-top-2 space-y-4">
+             <h4 className="text-sm font-semibold text-blue-400 flex items-center gap-2">
+              <Target size={16} /> Ballistics & Evidence
+            </h4>
+            <div className="space-y-3">
+               <span className="text-xs text-slate-400 font-bold uppercase tracking-wider block">GSR or Ballistics Match Found?</span>
+               <div className="flex gap-2">
+                  <button 
+                    onClick={() => onUpdate({ officerAttackGSR: true })} 
+                    className={`flex-1 py-2 text-xs font-bold rounded transition-colors ${scenarioState.officerAttackGSR ? 'bg-blue-600 text-white' : 'bg-slate-900 text-slate-500 border border-slate-700'}`}
+                  >Yes (Match)</button>
+                  <button 
+                    onClick={() => onUpdate({ officerAttackGSR: false })} 
+                    className={`flex-1 py-2 text-xs font-bold rounded transition-colors ${!scenarioState.officerAttackGSR ? 'bg-slate-700 text-white' : 'bg-slate-900 text-slate-500 border border-slate-700'}`}
+                  >No Match</button>
+               </div>
+            </div>
+          </div>
+        )}
+
+        {/* Traffic Stop Details Card */}
+        {scenarioState.incidentType.includes('traffic_stop') && (
+          <div className="mt-4 p-4 bg-slate-800/50 rounded-lg border border-slate-700 animate-in fade-in slide-in-from-top-2 space-y-4">
+            <h4 className="text-sm font-semibold text-blue-400 flex items-center gap-2">
+              <Car size={16} /> Traffic Stop Details
+            </h4>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+              {TRAFFIC_VIOLATIONS.map(v => (
+                <button
+                  key={v.id}
+                  onClick={() => toggleIncident(v.id)}
+                  className={`py-2 px-3 rounded border text-[10px] font-bold uppercase transition-all ${scenarioState.incidentType.includes(v.id) ? 'bg-blue-600 border-blue-400 text-white shadow-md' : 'bg-slate-900 border-slate-700 text-slate-400 hover:text-slate-300'}`}
+                >
+                  {v.label}
+                </button>
+              ))}
+            </div>
+
+            {scenarioState.incidentType.includes('traffic_speeding') && (
+              <div className="p-3 bg-slate-900/60 rounded border border-slate-700 space-y-3 animate-in zoom-in-95">
+                <div className="flex items-center justify-between">
+                   <label className="text-[10px] text-slate-400 uppercase font-bold">Speed Limit</label>
+                   <div className="flex bg-slate-800 rounded p-0.5 border border-slate-700">
+                      {[75, 90].map(limit => (
+                        <button 
+                          key={limit}
+                          onClick={() => onUpdate({speedLimit: limit as any})} 
+                          className={`px-3 py-1 text-[10px] font-bold rounded transition-all ${scenarioState.speedLimit === limit ? 'bg-blue-600 text-white shadow-sm' : 'text-slate-500 hover:text-slate-400'}`}
+                        >{limit}</button>
+                      ))}
+                   </div>
+                </div>
+                <div className="flex items-center justify-between">
+                   <label className="text-[10px] text-slate-400 uppercase font-bold">Driver Speed (mph)</label>
+                   <div className="relative w-24">
+                      <Gauge size={12} className="absolute left-2 top-1/2 -translate-y-1/2 text-blue-400" />
+                      <input 
+                        type="number" 
+                        min="0" 
+                        placeholder="0" 
+                        className="w-full bg-slate-800 border border-slate-600 rounded pl-7 pr-2 py-1.5 text-xs text-white outline-none focus:border-blue-500 transition-colors"
+                        value={scenarioState.driverSpeed}
+                        onChange={(e) => onUpdate({driverSpeed: e.target.value === '' ? '' : parseInt(e.target.value)})}
+                      />
+                   </div>
+                </div>
+              </div>
+            )}
+
+            {scenarioState.incidentType.includes('traffic_joyriding') && (
+              <div className="pt-2">
+                <span className="text-[10px] text-slate-400 uppercase font-bold block mb-2">Vehicle Outcome (Joyriding)</span>
+                <div className="flex gap-2">
+                  <button onClick={() => onUpdate({ trafficVehicleDestroyed: false })} className={`flex-1 py-1.5 text-[10px] font-bold rounded transition-all border ${scenarioState.trafficVehicleDestroyed === false ? 'bg-blue-600 border-blue-400 text-white' : 'bg-slate-900 text-slate-400 border-slate-700'}`}>Recovered</button>
+                  <button onClick={() => onUpdate({ trafficVehicleDestroyed: true })} className={`flex-1 py-1.5 text-[10px] font-bold rounded transition-all border ${scenarioState.trafficVehicleDestroyed === true ? 'bg-red-600 border-red-500 text-white' : 'bg-slate-900 text-slate-400 border-slate-700'}`}>Destroyed</button>
+                </div>
+              </div>
+            )}
+          </div>
+        )}
+
         {scenarioState.incidentType.includes('boost') && (
           <div className="mt-4 p-4 bg-slate-800/50 rounded-lg border border-slate-700 animate-in fade-in slide-in-from-top-2">
             <h4 className="text-sm font-semibold text-blue-400 mb-3 flex items-center gap-2">
@@ -234,9 +518,16 @@ export const ScenarioSelector: React.FC<ScenarioSelectorProps> = ({
                 <h3 className="text-sm font-bold text-slate-400 uppercase tracking-wider flex items-center gap-2">
                   <User size={16} /> Suspect Role
                 </h3>
-                <div className="p-4 bg-slate-800/40 rounded-lg border border-slate-700 space-y-4">
+                <div className={`p-4 bg-slate-800/40 rounded-lg border transition-all duration-500 space-y-4 ${isRoleMissing ? 'border-amber-500/50 shadow-[0_0_15px_-3px_rgba(245,158,11,0.2)] animate-pulse' : 'border-slate-700'}`}>
                   <div>
-                    <span className="text-xs text-slate-400 font-bold uppercase tracking-wider block mb-3">Your Suspects Vehicle Involvement (Including Swaps)</span>
+                    <div className="flex justify-between items-center mb-3">
+                      <span className="text-xs text-slate-400 font-bold uppercase tracking-wider">Your Suspects Vehicle Involvement</span>
+                      {isRoleMissing && (
+                        <span className="flex items-center gap-1 text-[10px] font-bold text-amber-500 animate-bounce">
+                           <Info size={10} /> REQUIRED
+                        </span>
+                      )}
+                    </div>
                     <div className="flex gap-2">
                       <button onClick={() => handleRoleChange('no')} className={`flex-1 py-2 px-2 rounded border text-xs font-bold uppercase transition-all ${scenarioState.suspectDriver === 'no' ? 'bg-blue-600 border-blue-400 text-white' : 'bg-slate-900 border-slate-700 text-slate-500 hover:text-slate-300'}`}>Passenger (Accessory)</button>
                       <button onClick={() => handleRoleChange('yes')} className={`flex-1 py-2 px-2 rounded border text-xs font-bold uppercase transition-all ${scenarioState.suspectDriver === 'yes' ? 'bg-blue-600 border-blue-400 text-white' : 'bg-slate-900 border-slate-700 text-slate-500 hover:text-slate-300'}`}>Driver (Principal)</button>
@@ -246,8 +537,7 @@ export const ScenarioSelector: React.FC<ScenarioSelectorProps> = ({
 
                   {scenarioState.suspectDriver === 'mixed' && (
                     <div className="bg-slate-900/60 rounded border border-slate-700 p-3 animate-in fade-in zoom-in-95">
-                      <h5 className="text-[10px] text-slate-400 uppercase font-bold mb-1">Your Suspects Stolen Swap Vehicles</h5>
-                      <p className="text-[9px] text-red-400 font-medium mb-3">Exclude personal vehicles.</p>
+                      <h5 className="text-[10px] text-slate-400 uppercase font-bold mb-1">Stolen Swap Vehicles</h5>
                       <div className="grid grid-cols-1 gap-4">
                         <div className="space-y-2 border-b border-slate-800 pb-3">
                           <span className="text-[9px] font-bold text-blue-400 block mb-1 uppercase tracking-tighter">As Driver (Principal)</span>
@@ -306,7 +596,7 @@ export const ScenarioSelector: React.FC<ScenarioSelectorProps> = ({
                     <h4 className="text-[10px] text-blue-400 font-bold uppercase tracking-widest">Pursuit Details</h4>
                     
                     <div>
-                      <span className="text-xs text-slate-300 block mb-2">Did chase cause significant damage or injury?</span>
+                      <span className="text-xs text-slate-300 block mb-2">Did chase cause significant damage?</span>
                       <div className="flex gap-2">
                         <button onClick={() => onUpdate({ recklessEvasionDamage: false })} className={`flex-1 py-1.5 text-xs font-bold rounded transition-colors ${!scenarioState.recklessEvasionDamage ? 'bg-slate-700 text-white' : 'bg-slate-900 text-slate-500 border border-slate-700'}`}>No</button>
                         <button onClick={() => onUpdate({ recklessEvasionDamage: true })} className={`flex-1 py-1.5 text-xs font-bold rounded transition-colors ${scenarioState.recklessEvasionDamage ? 'bg-red-600 text-white' : 'bg-slate-900 text-slate-500 border border-slate-700'}`}>Yes (Reckless)</button>
@@ -318,12 +608,11 @@ export const ScenarioSelector: React.FC<ScenarioSelectorProps> = ({
                         <span className="text-xs text-slate-300 block mb-2 flex items-center gap-1">Any documented getaway swaps?</span>
                         <div className="flex gap-2 mb-3">
                           <button onClick={() => handleVehicleSwapsChange(false)} className={`flex-1 py-1.5 text-xs font-bold rounded transition-colors ${!scenarioState.vehicleSwaps ? 'bg-slate-700 text-white' : 'bg-slate-900 text-slate-500 border border-slate-700'}`}>No</button>
-                          <button onClick={() => handleVehicleSwapsChange(true)} className={`flex-1 py-1.5 text-xs font-bold rounded transition-colors ${scenarioState.vehicleSwaps ? 'bg-red-600 text-white' : 'bg-slate-900 text-slate-500 border border-slate-700'}`}>Yes</button>
+                          <button onClick={() => handleVehicleSwapsChange(true)} className={`flex-1 py-1.5 text-xs font-bold rounded transition-colors ${scenarioState.recklessEvasionDamage ? 'bg-red-600 text-white' : 'bg-slate-900 text-slate-500 border border-slate-700'}`}>Yes</button>
                         </div>
                         {scenarioState.vehicleSwaps && (
                           <div className="bg-slate-900/60 p-3 rounded border border-slate-700 animate-in fade-in zoom-in-95">
-                            <h5 className="text-[9px] text-slate-400 uppercase font-bold mb-1">Your Suspects Stolen Swap Vehicles</h5>
-                            <p className="text-[8px] text-red-400 mb-3">Exclude personal vehicles.</p>
+                            <h5 className="text-[9px] text-slate-400 uppercase font-bold mb-1">Swap Vehicles</h5>
                             <div className="grid grid-cols-2 gap-3">
                               <div className="space-y-1">
                                 <label className="text-[8px] text-slate-500 uppercase font-bold">Recovered</label>
@@ -396,11 +685,10 @@ export const ScenarioSelector: React.FC<ScenarioSelectorProps> = ({
             {/* Arrest Processing Section */}
             <div className="space-y-4 mt-6 border-t border-slate-700 pt-6">
               <h3 className="text-sm font-bold text-slate-400 uppercase tracking-wider flex items-center gap-2">
-                <Briefcase size={16} /> Arrest Processing (If Applicable)
+                <PackageSearch size={16} /> Arrest Processing
               </h3>
               
               <div className="flex flex-col gap-3">
-                {/* Illegal Drugs Card */}
                 <div className="bg-slate-800/40 p-4 rounded-lg border border-slate-700/60 flex items-center justify-between">
                   <span className="text-sm font-medium text-slate-200">Illegal Drugs Found</span>
                   <div className="flex bg-slate-900/80 rounded border border-slate-600 p-0.5">
@@ -434,12 +722,11 @@ export const ScenarioSelector: React.FC<ScenarioSelectorProps> = ({
                     </div>
                     <div>
                       <span className="text-[10px] text-orange-300 font-bold block mb-1">Oxy</span>
-                      <input placeholder="Count" type="number" className="w-full bg-slate-800 border border-slate-600 rounded px-2 py-1 text-xs" value={scenarioState.drugOxyCount} onChange={e => onUpdate({drugOxyCount: e.target.value === '' ? '' : parseInt(e.target.value)})} />
+                      <input placeholder="Count" type="number" className="w-full bg-slate-800 border border-slate-600 rounded px-2 py-1.5 text-xs" value={scenarioState.drugOxyCount} onChange={e => onUpdate({drugOxyCount: e.target.value === '' ? '' : parseInt(e.target.value)})} />
                     </div>
                   </div>
                 )}
 
-                {/* Weapons Search Card */}
                 <div className="bg-slate-800/40 p-4 rounded-lg border border-slate-700/60 space-y-3">
                   <span className="text-sm font-medium text-slate-200 block">Illegal Weapon Possession (No use)</span>
                   <div className="flex gap-2">
@@ -458,7 +745,6 @@ export const ScenarioSelector: React.FC<ScenarioSelectorProps> = ({
                   </div>
                 </div>
 
-                {/* Gov Equip Card */}
                 <div className="bg-slate-800/40 p-4 rounded-lg border border-slate-700/60 flex items-center justify-between">
                   <span className="text-sm font-medium text-slate-200">Government Equipment Found</span>
                   <div className="flex bg-slate-900/80 rounded border border-slate-600 p-0.5">
@@ -473,7 +759,6 @@ export const ScenarioSelector: React.FC<ScenarioSelectorProps> = ({
                   </div>
                 </div>
 
-                {/* Unpaid Tickets Card */}
                 <div className="bg-slate-800/40 p-4 rounded-lg border border-slate-700/60 flex items-center justify-between">
                   <div className="flex items-center gap-2">
                     <Ticket size={18} className="text-yellow-500" />
