@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { FleeingType, ScenarioState } from '../types';
 import { Car, User, AlertTriangle, Siren, RefreshCcw, Briefcase, Ticket, ShieldAlert, Gauge, PackageSearch, Info, Target, Users, Fish, Trash2 } from 'lucide-react';
@@ -608,7 +607,7 @@ export const ScenarioSelector: React.FC<ScenarioSelectorProps> = ({
                         <span className="text-xs text-slate-300 block mb-2 flex items-center gap-1">Any documented getaway swaps?</span>
                         <div className="flex gap-2 mb-3">
                           <button onClick={() => handleVehicleSwapsChange(false)} className={`flex-1 py-1.5 text-xs font-bold rounded transition-colors ${!scenarioState.vehicleSwaps ? 'bg-slate-700 text-white' : 'bg-slate-900 text-slate-500 border border-slate-700'}`}>No</button>
-                          <button onClick={() => handleVehicleSwapsChange(true)} className={`flex-1 py-1.5 text-xs font-bold rounded transition-colors ${scenarioState.recklessEvasionDamage ? 'bg-red-600 text-white' : 'bg-slate-900 text-slate-500 border border-slate-700'}`}>Yes</button>
+                          <button onClick={() => handleVehicleSwapsChange(true)} className={`flex-1 py-1.5 text-xs font-bold rounded transition-colors ${scenarioState.vehicleSwaps ? 'bg-red-600 text-white' : 'bg-slate-900 text-slate-500 border border-slate-700'}`}>Yes</button>
                         </div>
                         {scenarioState.vehicleSwaps && (
                           <div className="bg-slate-900/60 p-3 rounded border border-slate-700 animate-in fade-in zoom-in-95">
