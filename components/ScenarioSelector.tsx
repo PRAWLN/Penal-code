@@ -52,7 +52,11 @@ export const ScenarioSelector: React.FC<ScenarioSelectorProps> = ({
 
       if (id === 'traffic_speeding') update.driverSpeed = '';
       if (id === 'traffic_joyriding') update.trafficVehicleDestroyed = null;
-      if (id === 'boost') update.boostVehicleDestroyed = null;
+      if (id === 'boost') {
+          update.boostVehicleDestroyed = null;
+          update.boostGpsDisabled = null;
+          update.boostIntentToKeep = null;
+      }
       
       if (id === 'shots_fired') {
         update.shotsFiredVictim = 'none';
@@ -126,6 +130,8 @@ export const ScenarioSelector: React.FC<ScenarioSelectorProps> = ({
           update.humaneLabsStolenGoods = true;
           update.robberyStolenGoods = true;
           update.boostVehicleDestroyed = null;
+          update.boostGpsDisabled = null;
+          update.boostIntentToKeep = null;
           update.hasHostages = false;
           update.hostageCount = '';
       }
@@ -492,16 +498,50 @@ export const ScenarioSelector: React.FC<ScenarioSelectorProps> = ({
             <h4 className="text-sm font-semibold text-blue-400 mb-3 flex items-center gap-2">
               <Car size={16} /> Boost Recovery Status
             </h4>
-            <div className="flex flex-col gap-3">
-              <div className="flex gap-2">
-                <button
-                  onClick={() => onUpdate({ boostVehicleDestroyed: false })}
-                  className={`flex-1 py-2 text-xs font-bold rounded transition-colors ${scenarioState.boostVehicleDestroyed === false ? 'bg-blue-600 text-white' : 'bg-slate-900 text-slate-400 border border-slate-700'}`}
-                >Recovered (Joyriding)</button>
-                <button
-                  onClick={() => onUpdate({ boostVehicleDestroyed: true })}
-                  className={`flex-1 py-2 text-xs font-bold rounded transition-colors ${scenarioState.boostVehicleDestroyed === true ? 'bg-red-600 text-white' : 'bg-slate-900 text-slate-400 border border-slate-700'}`}
-                >Destroyed (GTA)</button>
+            <div className="flex flex-col gap-5">
+              {/* Question 1: GPS Tracker */}
+              <div className="space-y-2">
+                <span className="text-xs text-slate-300">Was the GPS tracker disabled?</span>
+                <div className="flex gap-2">
+                  <button
+                    onClick={() => onUpdate({ boostGpsDisabled: false })}
+                    className={`flex-1 py-2 text-[10px] font-bold uppercase rounded transition-colors ${scenarioState.boostGpsDisabled === false ? 'bg-blue-600 text-white' : 'bg-slate-900 text-slate-400 border border-slate-700'}`}
+                  >No (Joyriding)</button>
+                  <button
+                    onClick={() => onUpdate({ boostGpsDisabled: true })}
+                    className={`flex-1 py-2 text-[10px] font-bold uppercase rounded transition-colors ${scenarioState.boostGpsDisabled === true ? 'bg-red-600 text-white' : 'bg-slate-900 text-slate-400 border border-slate-700'}`}
+                  >Yes (GTA)</button>
+                </div>
+              </div>
+
+              {/* Question 2: Destroyed/Dumped */}
+              <div className="space-y-2">
+                <span className="text-xs text-slate-300">Was the vehicle blown up or water dumped?</span>
+                <div className="flex gap-2">
+                  <button
+                    onClick={() => onUpdate({ boostVehicleDestroyed: false })}
+                    className={`flex-1 py-2 text-[10px] font-bold uppercase rounded transition-colors ${scenarioState.boostVehicleDestroyed === false ? 'bg-blue-600 text-white' : 'bg-slate-900 text-slate-400 border border-slate-700'}`}
+                  >No (Joyriding)</button>
+                  <button
+                    onClick={() => onUpdate({ boostVehicleDestroyed: true })}
+                    className={`flex-1 py-2 text-[10px] font-bold uppercase rounded transition-colors ${scenarioState.boostVehicleDestroyed === true ? 'bg-red-600 text-white' : 'bg-slate-900 text-slate-400 border border-slate-700'}`}
+                  >Yes (GTA)</button>
+                </div>
+              </div>
+
+              {/* Question 3: Intent to Keep */}
+              <div className="space-y-2">
+                <span className="text-xs text-slate-300">Was there any info / items to show intent of not returning the vehicle?</span>
+                <div className="flex gap-2">
+                  <button
+                    onClick={() => onUpdate({ boostIntentToKeep: false })}
+                    className={`flex-1 py-2 text-[10px] font-bold uppercase rounded transition-colors ${scenarioState.boostIntentToKeep === false ? 'bg-blue-600 text-white' : 'bg-slate-900 text-slate-400 border border-slate-700'}`}
+                  >No (Joyriding)</button>
+                  <button
+                    onClick={() => onUpdate({ boostIntentToKeep: true })}
+                    className={`flex-1 py-2 text-[10px] font-bold uppercase rounded transition-colors ${scenarioState.boostIntentToKeep === true ? 'bg-red-600 text-white' : 'bg-slate-900 text-slate-400 border border-slate-700'}`}
+                  >Yes (GTA)</button>
+                </div>
               </div>
             </div>
           </div>

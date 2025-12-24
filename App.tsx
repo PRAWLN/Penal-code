@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { Charge, ChargeCategory, FleeingType, ScenarioState } from './types';
 import { PENAL_CODE } from './data/penalCode';
@@ -22,6 +21,8 @@ export default function App() {
     speedLimit: 75,
     trafficVehicleDestroyed: null,
     boostVehicleDestroyed: null,
+    boostGpsDisabled: null,
+    boostIntentToKeep: null,
     vehicleSwaps: false,
     stolenRecovered: '',
     stolenDestroyed: '',
@@ -136,18 +137,33 @@ export default function App() {
     } else {
         let joyridingCount = 0;
         let gtaCount = 0;
+        
+        // Boost Specific Logic
         if (incidents.includes('boost')) {
-           if (scenarioState.boostVehicleDestroyed === false) joyridingCount += 1;
-           else if (scenarioState.boostVehicleDestroyed === true) gtaCount += 1;
+           const isGtaBoost = scenarioState.boostGpsDisabled === true || 
+                             scenarioState.boostVehicleDestroyed === true || 
+                             scenarioState.boostIntentToKeep === true;
+                             
+           const isJoyBoost = scenarioState.boostGpsDisabled === false && 
+                             scenarioState.boostVehicleDestroyed === false && 
+                             scenarioState.boostIntentToKeep === false;
+           
+           if (isGtaBoost) gtaCount += 1;
+           else if (isJoyBoost) joyridingCount += 1;
         }
+
+        // Stolen Vehicle (Traffic Stop) Logic
         if (incidents.includes('traffic_joyriding')) {
             if (scenarioState.trafficVehicleDestroyed === false) joyridingCount += 1;
             else if (scenarioState.trafficVehicleDestroyed === true) gtaCount += 1;
         }
+
+        // Swap Vehicles Logic
         if (scenarioState.vehicleSwaps) {
             joyridingCount += Number(scenarioState.stolenRecovered) || 0;
             gtaCount += Number(scenarioState.stolenDestroyed) || 0;
         }
+
         const vehicleTheftRole = scenarioState.suspectDriver === 'no' ? 'accessory' : 'principal';
         if (joyridingCount > 0) add(`joyriding_${vehicleTheftRole}`, joyridingCount);
         if (gtaCount > 0) add(`grand_theft_auto_${vehicleTheftRole}`, gtaCount);

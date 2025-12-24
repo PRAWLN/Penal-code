@@ -1,4 +1,3 @@
-
 export enum ChargeCategory {
   INFRACTION = 'Infraction',
   MISDEMEANOR = 'Misdemeanor',
@@ -39,7 +38,11 @@ export interface ScenarioState {
   driverSpeed: number | '';
   speedLimit: 75 | 90;
   trafficVehicleDestroyed: boolean | null;
-  boostVehicleDestroyed: boolean | null;
+  
+  // Boost Details
+  boostVehicleDestroyed: boolean | null; // Was vehicle blown up or water dumped?
+  boostGpsDisabled: boolean | null;      // Was the GPS tracker disabled?
+  boostIntentToKeep: boolean | null;     // Any info/items showing intent not to return?
   
   vehicleSwaps: boolean;
   stolenRecovered: number | ''; 
