@@ -1,5 +1,6 @@
 import React, { useState, useMemo } from 'react';
 import { Charge, ChargeCategory, ScenarioState, FleeingType } from '../types';
+import { PENAL_CODE } from '../data/penalCode';
 import { Trash2, AlertCircle, DollarSign, Clock, HelpCircle, Layers, FileText, ClipboardList, Copy, Check } from 'lucide-react';
 
 interface ChargeWithCount {
@@ -51,7 +52,7 @@ ${charges.map(c => `- ${c.charge.title} ${c.count > 1 ? `(x${c.count})` : ''}`).
     const lines: string[] = [];
     const { incidentType: incidents, fleeing, suspectDriver, recklessEvasionDamage, driverSpeed, speedLimit, hasHostages, hostageCount, robberyInjury, hostageRole, boostGpsDisabled, boostVehicleDestroyed, boostIntentToKeep, trafficVehicleDestroyed, vehicleSwaps, stolenRecovered, stolenDestroyed } = scenarioState;
 
-    if (incidents.length === 0) return "No active scenario triggers detected. Please select incidents to generate narrative.";
+    if (incidents.length === 0 && !scenarioState.drugsFound) return "No active scenario triggers detected. Please select incidents to generate narrative.";
 
     // 1. Core Incident & Robberies
     const robberyIds = ['money_loan', 'comic_store', 'pdm_alarm', 'break_and_enter', 'warehouse_robbery', 'humane_labs'];
@@ -133,10 +134,77 @@ ${charges.map(c => `- ${c.charge.title} ${c.count > 1 ? `(x${c.count})` : ''}`).
        lines.push(`Shots Fired: Suspect discharged a firearm towards ${victim}.`);
     }
 
-    // 6. Contraband
+    // 6. Contraband & Drugs
     if (scenarioState.drugsFound) {
-       lines.push("Suspect was found in possession of illegal narcotics during processing.");
+       const drugSummary: string[] = ["Suspect was found in possession of illegal narcotics during processing."];
+       
+       // Marijuana
+       const mjJoints = Number(scenarioState.drugMarijuanaJoints) || 0;
+       const mjPlants = Number(scenarioState.drugMarijuanaPlants) || 0;
+       if (mjJoints > 0 || mjPlants > 0) {
+         let chargeId = '';
+         if (mjJoints >= 40 || mjPlants >= 5) chargeId = 'possession_with_intent_to_distribute_marijuana_principal';
+         else if (mjJoints >= 25 || mjPlants >= 3) chargeId = 'possession_of_controlled_substance_marijuana_principal_1';
+         else if (mjJoints >= 15 || mjPlants >= 2) chargeId = 'possession_of_controlled_substance_marijuana_principal_2';
+         else if (mjJoints >= 1 || mjPlants >= 1) chargeId = 'possession_of_controlled_substance_marijuana_principal_3';
+         
+         const charge = PENAL_CODE.find(c => c.id === chargeId);
+         const items = [];
+         if (mjJoints > 0) items.push(`${mjJoints} Marijuana Joint(s)`);
+         if (mjPlants > 0) items.push(`${mjPlants} Marijuana Plant/Seed(s)`);
+         drugSummary.push(`- ${items.join(' and ')}: ${charge?.title || 'Applied Marijuana Possession'}`);
+       }
+
+       // Cocaine
+       const cokeBags = Number(scenarioState.drugCocaineBaggies) || 0;
+       const cokeBricks = Number(scenarioState.drugCocaineBricks) || 0;
+       if (cokeBags > 0 || cokeBricks > 0) {
+         let chargeId = '';
+         if (cokeBags >= 40 || cokeBricks >= 1) chargeId = 'possession_with_intent_to_distribute_cocaine_principal';
+         else if (cokeBags >= 20) chargeId = 'possession_of_controlled_substance_cocaine_principal_1';
+         else if (cokeBags >= 10) chargeId = 'possession_of_controlled_substance_cocaine_principal_2';
+         else if (cokeBags >= 1) chargeId = 'possession_of_controlled_substance_cocaine_principal_3';
+         
+         const charge = PENAL_CODE.find(c => c.id === chargeId);
+         const items = [];
+         if (cokeBags > 0) items.push(`${cokeBags} Cocaine Baggie(s)`);
+         if (cokeBricks > 0) items.push(`${cokeBricks} Cocaine Brick(s)`);
+         drugSummary.push(`- ${items.join(' and ')}: ${charge?.title || 'Applied Cocaine Possession'}`);
+       }
+
+       // Meth
+       const methBags = Number(scenarioState.drugMethBaggies) || 0;
+       const methBricks = Number(scenarioState.drugMethBricks) || 0;
+       if (methBags > 0 || methBricks > 0) {
+         let chargeId = '';
+         if (methBags >= 40 || methBricks >= 1) chargeId = 'possession_with_intent_to_distribute_meth_principal';
+         else if (methBags >= 10) chargeId = 'possession_of_controlled_substance_meth_principal_1';
+         else if (methBags >= 5) chargeId = 'possession_of_controlled_substance_meth_principal_2';
+         else if (methBags >= 1) chargeId = 'possession_of_controlled_substance_meth_principal_3';
+         
+         const charge = PENAL_CODE.find(c => c.id === chargeId);
+         const items = [];
+         if (methBags > 0) items.push(`${methBags} Meth Baggie(s)`);
+         if (methBricks > 0) items.push(`${methBricks} Meth Brick(s)`);
+         drugSummary.push(`- ${items.join(' and ')}: ${charge?.title || 'Applied Meth Possession'}`);
+       }
+
+       // Oxy
+       const oxy = Number(scenarioState.drugOxyCount) || 0;
+       if (oxy > 0) {
+         let chargeId = '';
+         if (oxy >= 20) chargeId = 'possession_with_intent_to_distribute_oxy_principal';
+         else if (oxy >= 10) chargeId = 'possession_of_controlled_substance_oxy_principal_1';
+         else if (oxy >= 5) chargeId = 'possession_of_controlled_substance_oxy_principal_2';
+         else if (oxy >= 1) chargeId = 'possession_of_controlled_substance_oxy_principal_3';
+         
+         const charge = PENAL_CODE.find(c => c.id === chargeId);
+         drugSummary.push(`- ${oxy} Oxy Count: ${charge?.title || 'Applied Oxy Possession'}`);
+       }
+
+       lines.push(drugSummary.join('\n'));
     }
+
     if (scenarioState.weaponPossessionClass1 || scenarioState.weaponPossessionClass2 || scenarioState.weaponPossessionClass3) {
        lines.push("Suspect was found in possession of unlicensed or illegal class-category firearms.");
     }
