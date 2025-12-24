@@ -707,7 +707,7 @@ export const ScenarioSelector: React.FC<ScenarioSelectorProps> = ({
                     <div>
                       <span className="text-[10px] text-green-400 font-bold block mb-1">Marijuana</span>
                       <input placeholder="Joints" type="number" className="w-full bg-slate-800 border border-slate-600 rounded px-2 py-1 text-xs mb-1" value={scenarioState.drugMarijuanaJoints} onChange={e => onUpdate({drugMarijuanaJoints: e.target.value === '' ? '' : parseInt(e.target.value)})} />
-                      <input placeholder="Plants" type="number" className="w-full bg-slate-800 border border-slate-600 rounded px-2 py-1 text-xs" value={scenarioState.drugMarijuanaPlants} onChange={e => onUpdate({drugMarijuanaPlants: e.target.value === '' ? '' : parseInt(e.target.value)})} />
+                      <input placeholder="Plants / Seeds" type="number" className="w-full bg-slate-800 border border-slate-600 rounded px-2 py-1 text-xs" value={scenarioState.drugMarijuanaPlants} onChange={e => onUpdate({drugMarijuanaPlants: e.target.value === '' ? '' : parseInt(e.target.value)})} />
                     </div>
                     <div>
                       <span className="text-[10px] text-white font-bold block mb-1">Cocaine</span>
