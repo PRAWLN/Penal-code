@@ -416,7 +416,7 @@ export default function App() {
         </div>
         <div className="flex-1 bg-slate-950 p-4 md:p-6 lg:p-8 overflow-hidden">
           <div className="h-full max-w-4xl mx-auto">
-            <ChargeList charges={activeCharges} onRemoveCharge={handleRemoveCharge} />
+            <ChargeList charges={activeCharges} onRemoveCharge={handleRemoveCharge} scenarioState={scenarioState} />
           </div>
         </div>
       </main>
