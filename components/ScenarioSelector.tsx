@@ -8,7 +8,9 @@ interface ScenarioSelectorProps {
 }
 
 const INCIDENT_TYPES = [
+  { id: 'littering', label: 'Littering' },
   { id: 'traffic_stop', label: 'Traffic Stop' },
+  { id: 'fishing_hunting', label: 'Fishing / Hunting Violation' },
   { id: 'shots_fired', label: 'Shots Fired' },
   { id: 'break_and_enter', label: 'Break and Enter' },
   { id: 'boost', label: 'Boost' },
@@ -19,8 +21,6 @@ const INCIDENT_TYPES = [
   { id: 'comic_store', label: 'Comic Store Alarm' },
   { id: 'air_drops', label: 'Unauthorized Air Drops' },
   { id: 'humane_labs', label: 'Humane Labs Alarm' },
-  { id: 'littering', label: 'Littering' },
-  { id: 'fishing_hunting', label: 'Fishing / Hunting Violation' },
 ];
 
 const TRAFFIC_VIOLATIONS = [
