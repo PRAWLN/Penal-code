@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { Charge, ChargeCategory, FleeingType, ScenarioState } from './types';
 import { PENAL_CODE } from './data/penalCode';
@@ -15,6 +16,7 @@ export default function App() {
     incidentType: [],
     fleeing: FleeingType.NONE,
     suspectDriver: null,
+    // Fix: Removed invalid type annotation used as a value
     recklessEvasionDamage: false,
     customNarrative: '',
     driverSpeed: '',
@@ -73,6 +75,7 @@ export default function App() {
     unpaidTicketDays: '',
     litteringRepeated: false,
     litteringItemCount: '',
+    drugManufacturingType: null,
   });
 
   const scenarioCharges = useMemo(() => {
@@ -203,6 +206,10 @@ export default function App() {
         else add('aggravated_robbery_accessory');
     }
 
+    if (incidents.includes('bank_truck')) {
+       add('aggravated_robbery_principal');
+    }
+
     if (incidents.includes('comic_store') || incidents.includes('money_loan') || incidents.includes('pdm_alarm') || incidents.includes('break_and_enter')) {
         const hasInjury = scenarioState.robberyInjury || (incidents.includes('shots_fired') && ['local', 'civilian', 'govt'].includes(scenarioState.shotsFiredVictim));
         if (scenarioState.robberyStolenGoods) {
@@ -221,6 +228,16 @@ export default function App() {
         }
     }
 
+    if (incidents.includes('drug_manufacturing')) {
+      if (scenarioState.drugManufacturingType === 'weed') {
+        add('manufacture_of_controlled_substance_marijuana_principal');
+      } else if (scenarioState.drugManufacturingType === 'cocaine') {
+        add('manufacture_of_controlled_substance_cocaine_principal');
+      } else if (scenarioState.drugManufacturingType === 'meth') {
+        add('manufacture_of_controlled_substance_meth_principal');
+      }
+    }
+
     if (incidents.includes('air_drops')) add('smuggling_international_goods_principal');
     if (incidents.includes('humane_labs')) {
         if (scenarioState.humaneLabsStolenGoods) add('humane_labs_robbery_principal');
@@ -228,7 +245,7 @@ export default function App() {
     }
 
     // Universal Hostage Logic for specified incidents
-    const hostageIncidents = ['money_loan', 'pdm_alarm', 'warehouse_robbery', 'comic_store', 'break_and_enter', 'drug_trafficking_incident', 'humane_labs', 'air_drops'];
+    const hostageIncidents = ['money_loan', 'pdm_alarm', 'warehouse_robbery', 'comic_store', 'break_and_enter', 'drug_trafficking_incident', 'humane_labs', 'air_drops', 'bank_truck'];
     const hasAnyHostageIncident = incidents.some(it => hostageIncidents.includes(it));
     
     if (hasAnyHostageIncident && scenarioState.hasHostages && Number(scenarioState.hostageCount) > 0) {

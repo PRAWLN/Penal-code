@@ -1,6 +1,6 @@
 import React from 'react';
 import { FleeingType, ScenarioState } from '../types';
-import { Car, User, AlertTriangle, Siren, RefreshCcw, Briefcase, Ticket, ShieldAlert, Gauge, PackageSearch, Info, Target, Users, Fish, Trash2 } from 'lucide-react';
+import { Car, User, AlertTriangle, Siren, RefreshCcw, Briefcase, Ticket, ShieldAlert, Gauge, PackageSearch, Info, Target, Users, Fish, Trash2, Truck, FlaskConical } from 'lucide-react';
 
 interface ScenarioSelectorProps {
   scenarioState: ScenarioState;
@@ -11,6 +11,8 @@ const INCIDENT_TYPES = [
   { id: 'littering', label: 'Littering' },
   { id: 'traffic_stop', label: 'Traffic Stop' },
   { id: 'fishing_hunting', label: 'Fishing / Hunting Violation' },
+  { id: 'bank_truck', label: 'Bank Truck' },
+  { id: 'drug_manufacturing', label: 'Drug Manufacturing' },
   { id: 'shots_fired', label: 'Shots Fired' },
   { id: 'break_and_enter', label: 'Break and Enter' },
   { id: 'boost', label: 'Boost' },
@@ -79,7 +81,11 @@ export const ScenarioSelector: React.FC<ScenarioSelectorProps> = ({
           update.activelyFishing = true;
       }
 
-      const alarmIds = ['money_loan', 'comic_store', 'pdm_alarm', 'break_and_enter'];
+      if (id === 'drug_manufacturing') {
+        update.drugManufacturingType = null;
+      }
+
+      const alarmIds = ['money_loan', 'comic_store', 'pdm_alarm', 'break_and_enter', 'bank_truck'];
       const remainingAlarms = nextIncidents.filter(i => alarmIds.includes(i));
       if (remainingAlarms.length === 0 && alarmIds.includes(id)) {
           update.hostageCount = '';
@@ -134,6 +140,7 @@ export const ScenarioSelector: React.FC<ScenarioSelectorProps> = ({
           update.boostIntentToKeep = null;
           update.hasHostages = false;
           update.hostageCount = '';
+          update.drugManufacturingType = null;
       }
 
       update.incidentType = nextIncidents;
@@ -176,7 +183,7 @@ export const ScenarioSelector: React.FC<ScenarioSelectorProps> = ({
     onUpdate(update);
   };
 
-  const hostageIncidents = ['money_loan', 'pdm_alarm', 'warehouse_robbery', 'comic_store', 'break_and_enter', 'drug_trafficking_incident', 'humane_labs', 'air_drops'];
+  const hostageIncidents = ['money_loan', 'pdm_alarm', 'warehouse_robbery', 'comic_store', 'break_and_enter', 'drug_trafficking_incident', 'humane_labs', 'air_drops', 'bank_truck'];
   const showHostageSection = scenarioState.incidentType.some(it => hostageIncidents.includes(it));
 
   const hasActiveIncidents = scenarioState.incidentType.length > 0;
@@ -212,13 +219,44 @@ export const ScenarioSelector: React.FC<ScenarioSelectorProps> = ({
                 <div className={`w-4 h-4 rounded border mr-3 flex items-center justify-center ${scenarioState.incidentType.includes(type.id) ? 'bg-blue-500 border-blue-500' : 'border-slate-500'}`}>
                   {scenarioState.incidentType.includes(type.id) && <div className="w-2 h-2 bg-white rounded-sm" />}
                 </div>
-                <span className="text-sm font-medium">{type.label}</span>
+                <div className="flex items-center gap-2">
+                  {type.id === 'bank_truck' && <Truck size={14} className="opacity-50" />}
+                  {type.id === 'drug_manufacturing' && <FlaskConical size={14} className="opacity-50" />}
+                  <span className="text-sm font-medium">{type.label}</span>
+                </div>
               </label>
             ))}
           </div>
         </div>
 
-        {/* Littering Details Card */}
+        {/* Drug Manufacturing Card */}
+        {scenarioState.incidentType.includes('drug_manufacturing') && (
+          <div className="mt-4 p-4 bg-slate-800/50 rounded-lg border border-slate-700 animate-in fade-in slide-in-from-top-2 space-y-4">
+             <h4 className="text-sm font-semibold text-blue-400 flex items-center gap-2">
+              <FlaskConical size={16} /> Drug Manufacturing
+            </h4>
+            <div className="space-y-3">
+               <span className="text-xs text-slate-300 font-bold uppercase tracking-wider block">Select Drug Being Manufactured:</span>
+               <div className="grid grid-cols-3 gap-2">
+                  <button 
+                    onClick={() => onUpdate({ drugManufacturingType: 'weed' })} 
+                    className={`py-2 text-[10px] font-bold rounded border transition-all ${scenarioState.drugManufacturingType === 'weed' ? 'bg-green-600 border-green-400 text-white shadow-md' : 'bg-slate-900 border-slate-700 text-slate-500 hover:text-slate-400'}`}
+                  >Weed</button>
+                  <button 
+                    onClick={() => onUpdate({ drugManufacturingType: 'cocaine' })} 
+                    className={`py-2 text-[10px] font-bold rounded border transition-all ${scenarioState.drugManufacturingType === 'cocaine' ? 'bg-blue-600 border-blue-400 text-white shadow-md' : 'bg-slate-900 border-slate-700 text-slate-500 hover:text-slate-400'}`}
+                  >Cocaine</button>
+                  <button 
+                    onClick={() => onUpdate({ drugManufacturingType: 'meth' })} 
+                    className={`py-2 text-[10px] font-bold rounded border transition-all ${scenarioState.drugManufacturingType === 'meth' ? 'bg-purple-600 border-purple-400 text-white shadow-md' : 'bg-slate-900 border-slate-700 text-slate-500 hover:text-slate-400'}`}
+                  >Meth</button>
+               </div>
+            </div>
+          </div>
+        )}
+
+        {/* Littering Details Card ... (Rest of component) */}
+        {/* Keeping original structure but truncated for brevity in change log */}
         {scenarioState.incidentType.includes('littering') && (
           <div className="mt-4 p-4 bg-slate-800/50 rounded-lg border border-slate-700 animate-in fade-in slide-in-from-top-2 space-y-4">
              <h4 className="text-sm font-semibold text-blue-400 flex items-center gap-2">
@@ -499,7 +537,6 @@ export const ScenarioSelector: React.FC<ScenarioSelectorProps> = ({
               <Car size={16} /> Boost Recovery Status
             </h4>
             <div className="flex flex-col gap-5">
-              {/* Question 1: GPS Tracker */}
               <div className="space-y-2">
                 <span className="text-xs text-slate-300">Was the GPS tracker disabled?</span>
                 <div className="flex gap-2">
@@ -514,7 +551,6 @@ export const ScenarioSelector: React.FC<ScenarioSelectorProps> = ({
                 </div>
               </div>
 
-              {/* Question 2: Destroyed/Dumped */}
               <div className="space-y-2">
                 <span className="text-xs text-slate-300">Was the vehicle blown up or water dumped?</span>
                 <div className="flex gap-2">
@@ -529,7 +565,6 @@ export const ScenarioSelector: React.FC<ScenarioSelectorProps> = ({
                 </div>
               </div>
 
-              {/* Question 3: Intent to Keep */}
               <div className="space-y-2">
                 <span className="text-xs text-slate-300">Was there any info / items to show intent of not returning the vehicle?</span>
                 <div className="flex gap-2">
@@ -551,7 +586,6 @@ export const ScenarioSelector: React.FC<ScenarioSelectorProps> = ({
           <>
             <div className="h-px bg-slate-700 my-4" />
             
-            {/* Suspect Role Selection */}
             {showRoleSection && (
               <div className="space-y-4 animate-in fade-in slide-in-from-top-2">
                 <h3 className="text-sm font-bold text-slate-400 uppercase tracking-wider flex items-center gap-2">
@@ -611,7 +645,6 @@ export const ScenarioSelector: React.FC<ScenarioSelectorProps> = ({
               </div>
             )}
 
-            {/* Behavior & Pursuit Details */}
             <div className="space-y-4 mt-6">
               <h3 className="text-sm font-bold text-slate-400 uppercase tracking-wider flex items-center gap-2">
                 <Siren size={16} /> Fleeing Behavior
@@ -677,7 +710,6 @@ export const ScenarioSelector: React.FC<ScenarioSelectorProps> = ({
               </div>
             </div>
 
-            {/* Officer Safety */}
             <div className="space-y-4 mt-6 border-t border-slate-700 pt-6">
               <h3 className="text-sm font-bold text-slate-400 uppercase tracking-wider flex items-center gap-2">
                 <ShieldAlert size={16} /> Officer Safety
@@ -721,7 +753,6 @@ export const ScenarioSelector: React.FC<ScenarioSelectorProps> = ({
               </div>
             </div>
 
-            {/* Arrest Processing Section */}
             <div className="space-y-4 mt-6 border-t border-slate-700 pt-6">
               <h3 className="text-sm font-bold text-slate-400 uppercase tracking-wider flex items-center gap-2">
                 <PackageSearch size={16} /> Arrest Processing

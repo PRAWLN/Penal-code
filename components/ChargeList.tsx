@@ -50,12 +50,12 @@ ${charges.map(c => `- ${c.charge.title} ${c.count > 1 ? `(x${c.count})` : ''}`).
   // Narrative Generator Logic
   const narrative = useMemo(() => {
     const lines: string[] = [];
-    const { incidentType: incidents, fleeing, suspectDriver, recklessEvasionDamage, driverSpeed, speedLimit, hasHostages, hostageCount, robberyInjury, hostageRole, boostGpsDisabled, boostVehicleDestroyed, boostIntentToKeep, trafficVehicleDestroyed, vehicleSwaps, stolenRecovered, stolenDestroyed } = scenarioState;
+    const { incidentType: incidents, fleeing, suspectDriver, recklessEvasionDamage, driverSpeed, speedLimit, hasHostages, hostageCount, robberyInjury, hostageRole, boostGpsDisabled, boostVehicleDestroyed, boostIntentToKeep, trafficVehicleDestroyed, vehicleSwaps, stolenRecovered, stolenDestroyed, drugManufacturingType } = scenarioState;
 
     if (incidents.length === 0 && !scenarioState.drugsFound) return "No active scenario triggers detected. Please select incidents to generate narrative.";
 
     // 1. Core Incident & Robberies
-    const robberyIds = ['money_loan', 'comic_store', 'pdm_alarm', 'break_and_enter', 'warehouse_robbery', 'humane_labs'];
+    const robberyIds = ['money_loan', 'comic_store', 'pdm_alarm', 'break_and_enter', 'warehouse_robbery', 'humane_labs', 'bank_truck'];
     const activeRobberies = incidents.filter(i => robberyIds.includes(i));
     
     if (activeRobberies.length > 0) {
@@ -69,6 +69,12 @@ ${charges.map(c => `- ${c.charge.title} ${c.count > 1 ? `(x${c.count})` : ''}`).
           const interaction = hostageRole === 'principal' ? "directly taking them hostage" : "being an accessory at the scene";
           lines.push(`During the robbery, ${hostageCount} hostage(s) were held, who remained ${condition}. Suspect was involved by ${interaction}.`);
        }
+    }
+
+    // Drug Manufacturing Narrative
+    if (incidents.includes('drug_manufacturing') && drugManufacturingType) {
+       const drugLabel = drugManufacturingType.charAt(0).toUpperCase() + drugManufacturingType.slice(1);
+       lines.push(`Suspect was apprehended at a drug lab involved in the illegal manufacture of ${drugLabel}.`);
     }
 
     // 2. Traffic & Speeding
@@ -138,7 +144,6 @@ ${charges.map(c => `- ${c.charge.title} ${c.count > 1 ? `(x${c.count})` : ''}`).
     if (scenarioState.drugsFound) {
        const drugSummary: string[] = ["Suspect was found in possession of illegal narcotics during processing."];
        
-       // Marijuana
        const mjJoints = Number(scenarioState.drugMarijuanaJoints) || 0;
        const mjPlants = Number(scenarioState.drugMarijuanaPlants) || 0;
        if (mjJoints > 0 || mjPlants > 0) {
@@ -155,7 +160,6 @@ ${charges.map(c => `- ${c.charge.title} ${c.count > 1 ? `(x${c.count})` : ''}`).
          drugSummary.push(`- ${items.join(' and ')}: ${charge?.title || 'Applied Marijuana Possession'}`);
        }
 
-       // Cocaine
        const cokeBags = Number(scenarioState.drugCocaineBaggies) || 0;
        const cokeBricks = Number(scenarioState.drugCocaineBricks) || 0;
        if (cokeBags > 0 || cokeBricks > 0) {
@@ -172,7 +176,6 @@ ${charges.map(c => `- ${c.charge.title} ${c.count > 1 ? `(x${c.count})` : ''}`).
          drugSummary.push(`- ${items.join(' and ')}: ${charge?.title || 'Applied Cocaine Possession'}`);
        }
 
-       // Meth
        const methBags = Number(scenarioState.drugMethBaggies) || 0;
        const methBricks = Number(scenarioState.drugMethBricks) || 0;
        if (methBags > 0 || methBricks > 0) {
@@ -189,7 +192,6 @@ ${charges.map(c => `- ${c.charge.title} ${c.count > 1 ? `(x${c.count})` : ''}`).
          drugSummary.push(`- ${items.join(' and ')}: ${charge?.title || 'Applied Meth Possession'}`);
        }
 
-       // Oxy
        const oxy = Number(scenarioState.drugOxyCount) || 0;
        if (oxy > 0) {
          let chargeId = '';
@@ -238,7 +240,6 @@ ${charges.map(c => `- ${c.charge.title} ${c.count > 1 ? `(x${c.count})` : ''}`).
 
   return (
     <div className="flex flex-col h-full bg-slate-900 border border-slate-700 rounded-lg shadow-xl overflow-hidden">
-      {/* Header totals */}
       <div className="bg-slate-800 p-6 border-b border-slate-700">
         <div className="flex items-center justify-between mb-4">
           <h2 className="text-xl font-bold text-white flex items-center gap-2">
@@ -278,7 +279,6 @@ ${charges.map(c => `- ${c.charge.title} ${c.count > 1 ? `(x${c.count})` : ''}`).
         </div>
       </div>
 
-      {/* Main Content Area */}
       <div className="flex-1 overflow-y-auto p-4 space-y-3">
         {activeTab === 'charges' ? (
           charges.map(({ charge, count }) => {
@@ -382,7 +382,6 @@ ${charges.map(c => `- ${c.charge.title} ${c.count > 1 ? `(x${c.count})` : ''}`).
         )}
       </div>
 
-      {/* Footer Actions */}
       <div className="p-4 bg-slate-800 border-t border-slate-700">
         <button 
           onClick={copyToClipboard}

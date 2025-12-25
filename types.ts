@@ -107,4 +107,7 @@ export interface ScenarioState {
   unpaidTicketDays: number | '';
   litteringRepeated: boolean;
   litteringItemCount: number | '';
+
+  // New Fields
+  drugManufacturingType: 'weed' | 'cocaine' | 'meth' | null;
 }
