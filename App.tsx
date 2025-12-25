@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { Charge, ChargeCategory, FleeingType, ScenarioState } from './types';
 import { PENAL_CODE } from './data/penalCode';
@@ -16,7 +15,6 @@ export default function App() {
     incidentType: [],
     fleeing: FleeingType.NONE,
     suspectDriver: null,
-    // Fix: Removed invalid type annotation used as a value
     recklessEvasionDamage: false,
     customNarrative: '',
     driverSpeed: '',

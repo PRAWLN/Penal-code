@@ -220,8 +220,6 @@ export const ScenarioSelector: React.FC<ScenarioSelectorProps> = ({
                   {scenarioState.incidentType.includes(type.id) && <div className="w-2 h-2 bg-white rounded-sm" />}
                 </div>
                 <div className="flex items-center gap-2">
-                  {type.id === 'bank_truck' && <Truck size={14} className="opacity-50" />}
-                  {type.id === 'drug_manufacturing' && <FlaskConical size={14} className="opacity-50" />}
                   <span className="text-sm font-medium">{type.label}</span>
                 </div>
               </label>
@@ -255,8 +253,7 @@ export const ScenarioSelector: React.FC<ScenarioSelectorProps> = ({
           </div>
         )}
 
-        {/* Littering Details Card ... (Rest of component) */}
-        {/* Keeping original structure but truncated for brevity in change log */}
+        {/* Littering Details Card */}
         {scenarioState.incidentType.includes('littering') && (
           <div className="mt-4 p-4 bg-slate-800/50 rounded-lg border border-slate-700 animate-in fade-in slide-in-from-top-2 space-y-4">
              <h4 className="text-sm font-semibold text-blue-400 flex items-center gap-2">
@@ -326,7 +323,6 @@ export const ScenarioSelector: React.FC<ScenarioSelectorProps> = ({
                   </div>
                 )}
                 
-                {/* Illegal Fish Handling Diagnostic - Non-Vehicle Possession */}
                 <div className="pt-2 mt-2 border-t border-slate-800 space-y-3">
                    <span className="text-[9px] text-slate-500 uppercase font-black tracking-widest block mb-1">Handling & Possession Diagnostic</span>
                    
