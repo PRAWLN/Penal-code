@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { FleeingType, ScenarioState, ShotsFiredVictim } from '../types';
 import { 
@@ -18,7 +19,8 @@ import {
   Trash2, 
   Truck, 
   FlaskConical, 
-  Crosshair 
+  Crosshair,
+  Home
 } from 'lucide-react';
 
 interface ScenarioSelectorProps {
@@ -104,6 +106,13 @@ export const ScenarioSelector: React.FC<ScenarioSelectorProps> = ({
 
       if (id === 'drug_manufacturing') {
         update.drugManufacturingType = null;
+      }
+
+      if (id === 'break_and_enter') {
+        update.beStolenGoods = false;
+        update.beIntentTools = false;
+        update.beHarm = false;
+        update.beFirearmUsed = false;
       }
 
       const alarmIds = ['money_loan', 'comic_store', 'pdm_alarm', 'break_and_enter', 'bank_truck'];
@@ -253,6 +262,50 @@ export const ScenarioSelector: React.FC<ScenarioSelectorProps> = ({
             ))}
           </div>
         </div>
+
+        {/* Break and Enter Card */}
+        {scenarioState.incidentType.includes('break_and_enter') && (
+          <div className="mt-4 p-4 bg-slate-800/50 rounded-lg border border-slate-700 animate-in fade-in slide-in-from-top-2 space-y-4">
+             <h4 className="text-sm font-semibold text-blue-400 flex items-center gap-2">
+              <Home size={16} /> Break and Enter Details
+            </h4>
+            <div className="space-y-5">
+              <div className="space-y-2">
+                <span className="text-xs text-slate-300 block">Did you find any stolen goods on your suspect?</span>
+                <div className="flex gap-2">
+                  <button onClick={() => onUpdate({ beStolenGoods: true })} className={`flex-1 py-1.5 text-xs font-bold rounded transition-colors ${scenarioState.beStolenGoods ? 'bg-blue-600 text-white' : 'bg-slate-900 text-slate-500 border border-slate-700'}`}>Yes</button>
+                  <button onClick={() => onUpdate({ beStolenGoods: false })} className={`flex-1 py-1.5 text-xs font-bold rounded transition-colors ${!scenarioState.beStolenGoods ? 'bg-slate-700 text-white' : 'bg-slate-900 text-slate-500 border border-slate-700'}`}>No</button>
+                </div>
+              </div>
+
+              <div className="space-y-2">
+                <span className="text-xs text-slate-300 block">Did any of the suspects have tools or intent to rob the property?</span>
+                <div className="flex gap-2">
+                  <button onClick={() => onUpdate({ beIntentTools: true })} className={`flex-1 py-1.5 text-xs font-bold rounded transition-colors ${scenarioState.beIntentTools ? 'bg-blue-600 text-white' : 'bg-slate-900 text-slate-500 border border-slate-700'}`}>Yes</button>
+                  <button onClick={() => onUpdate({ beIntentTools: false })} className={`flex-1 py-1.5 text-xs font-bold rounded transition-colors ${!scenarioState.beIntentTools ? 'bg-slate-700 text-white' : 'bg-slate-900 text-slate-500 border border-slate-700'}`}>No</button>
+                </div>
+              </div>
+
+              <div className="space-y-2">
+                <span className="text-xs text-slate-300 block">Were any locals harmed inside?</span>
+                <div className="flex gap-2">
+                  <button onClick={() => onUpdate({ beHarm: true })} className={`flex-1 py-1.5 text-xs font-bold rounded transition-colors ${scenarioState.beHarm ? 'bg-red-600 text-white' : 'bg-slate-900 text-slate-500 border border-slate-700'}`}>Yes</button>
+                  <button onClick={() => onUpdate({ beHarm: false, beFirearmUsed: false })} className={`flex-1 py-1.5 text-xs font-bold rounded transition-colors ${!scenarioState.beHarm ? 'bg-slate-700 text-white' : 'bg-slate-900 text-slate-500 border border-slate-700'}`}>No</button>
+                </div>
+              </div>
+
+              {scenarioState.beHarm && (
+                <div className="space-y-2 animate-in slide-in-from-top-1">
+                  <span className="text-xs text-slate-300 block font-semibold text-amber-400">Was a firearm used?</span>
+                  <div className="flex gap-2">
+                    <button onClick={() => onUpdate({ beFirearmUsed: true })} className={`flex-1 py-1.5 text-xs font-bold rounded transition-colors ${scenarioState.beFirearmUsed ? 'bg-blue-600 text-white' : 'bg-slate-900 text-slate-500 border border-slate-700'}`}>Yes</button>
+                    <button onClick={() => onUpdate({ beFirearmUsed: false })} className={`flex-1 py-1.5 text-xs font-bold rounded transition-colors ${!scenarioState.beFirearmUsed ? 'bg-slate-700 text-white' : 'bg-slate-900 text-slate-500 border border-slate-700'}`}>No</button>
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
+        )}
 
         {/* Shots Fired Details Card */}
         {scenarioState.incidentType.includes('shots_fired') && (
@@ -669,12 +722,10 @@ export const ScenarioSelector: React.FC<ScenarioSelectorProps> = ({
                 <div className="flex gap-2">
                   <button
                     onClick={() => onUpdate({ boostIntentToKeep: false })}
-                    className={`flex-1 py-2 text-[10px] font-bold uppercase rounded transition-colors ${scenarioState.boostIntentToKeep === false ? 'bg-blue-600 text-white' : 'bg-slate-900 text-slate-400 border border-slate-700'}`}
-                  >No (Joyriding)</button>
+                    className={`flex-1 py-1.5 text-[10px] font-bold uppercase rounded transition-colors ${scenarioState.boostIntentToKeep === false ? 'bg-blue-600 text-white' : 'bg-slate-900 text-slate-400 border border-slate-700'}`}>No</button>
                   <button
                     onClick={() => onUpdate({ boostIntentToKeep: true })}
-                    className={`flex-1 py-2 text-[10px] font-bold uppercase rounded transition-colors ${scenarioState.boostIntentToKeep === true ? 'bg-red-600 text-white' : 'bg-slate-900 text-slate-400 border border-slate-700'}`}
-                  >Yes (GTA)</button>
+                    className={`flex-1 py-1.5 text-[10px] font-bold uppercase rounded transition-colors ${scenarioState.boostIntentToKeep === true ? 'bg-red-600 text-white' : 'bg-slate-900 text-slate-400 border border-slate-700'}`}>Yes</button>
                 </div>
               </div>
             </div>
@@ -770,7 +821,7 @@ export const ScenarioSelector: React.FC<ScenarioSelectorProps> = ({
                       <span className="text-xs text-slate-300 block mb-2">Did chase cause significant damage?</span>
                       <div className="flex gap-2">
                         <button onClick={() => onUpdate({ recklessEvasionDamage: false })} className={`flex-1 py-1.5 text-xs font-bold rounded transition-colors ${!scenarioState.recklessEvasionDamage ? 'bg-slate-700 text-white' : 'bg-slate-900 text-slate-400 border border-slate-700'}`}>No</button>
-                        <button onClick={() => onUpdate({ recklessEvasionDamage: true })} className={`flex-1 py-1.5 text-xs font-bold rounded transition-colors ${scenarioState.recklessEvasionDamage ? 'bg-red-600 text-white' : 'bg-slate-900 text-slate-500 border border-slate-700'}`}>Yes (Reckless)</button>
+                        <button onClick={() => onUpdate({ recklessEvasionDamage: true })} className={`flex-1 py-1.5 text-xs font-bold rounded transition-colors ${scenarioState.recklessEvasionDamage ? 'bg-red-600 text-white' : 'bg-slate-900 text-slate-400 border border-slate-700'}`}>Yes (Reckless)</button>
                       </div>
                     </div>
 
@@ -827,24 +878,24 @@ export const ScenarioSelector: React.FC<ScenarioSelectorProps> = ({
                       <span className="text-xs text-slate-400 font-bold block mb-2">Did suspect attack/test positive for GSR?</span>
                       <div className="flex gap-2">
                         <button onClick={() => onUpdate({ officerAttackGSR: true })} className={`flex-1 py-1.5 text-xs font-bold rounded transition-colors ${scenarioState.officerAttackGSR ? 'bg-blue-600 text-white' : 'bg-slate-900 text-slate-400 border border-slate-700'}`}>Yes (Principal)</button>
-                        <button onClick={() => onUpdate({ officerAttackGSR: false })} className={`flex-1 py-1.5 text-xs font-bold rounded transition-colors ${!scenarioState.officerAttackGSR ? 'bg-slate-700 text-white' : 'bg-slate-900 text-slate-400 border border-slate-700'}`}>No (Accessory)</button>
+                        <button onClick={() => onUpdate({ officerAttackGSR: false })} className={`flex-1 py-1.5 text-xs font-bold rounded transition-colors ${!scenarioState.officerAttackGSR ? 'bg-slate-600 text-white' : 'bg-slate-900 text-slate-400 border border-slate-700'}`}>No (Accessory)</button>
                       </div>
                     </div>
                     <div className="grid grid-cols-1 gap-3 pt-2">
                       <div>
                         <label className="text-[10px] text-slate-400 font-bold block mb-1">Attacked with Weapon</label>
                         <div className="relative">
-                          <input type="number" min="0" value={scenarioState.officerAttackCountWeapon} onChange={(e) => onUpdate({ officerAttackCountWeapon: e.target.value === '' ? '' : parseInt(e.target.value) })} className="w-full bg-slate-900 border border-slate-600 rounded px-2 py-1.5 text-sm text-white focus:border-red-500 outline-none pl-8" placeholder="0" />
+                          <input type="number" min="0" value={scenarioState.officerAttackCountWeapon} onChange={(e) => onUpdate({ officerAttackCountWeapon: e.target.value === '' ? '' : parseInt(e.target.value) })} className="w-full bg-slate-800 border border-slate-600 rounded px-2 py-1.5 text-sm text-white focus:border-red-500 outline-none pl-8" placeholder="0" />
                           <ShieldAlert size={14} className="absolute left-2 top-1/2 -translate-y-1/2 text-red-500" />
                         </div>
                       </div>
                       <div>
                         <label className="text-[10px] text-slate-400 font-bold block mb-1">Attacked without Weapon</label>
-                        <input type="number" min="0" value={scenarioState.officerAttackCountNoWeapon} onChange={(e) => onUpdate({ officerAttackCountNoWeapon: e.target.value === '' ? '' : parseInt(e.target.value) })} className="w-full bg-slate-900 border border-slate-600 rounded px-2 py-1.5 text-sm text-white focus:border-orange-500 outline-none" placeholder="0" />
+                        <input type="number" min="0" value={scenarioState.officerAttackCountNoWeapon} onChange={(e) => onUpdate({ officerAttackCountNoWeapon: e.target.value === '' ? '' : parseInt(e.target.value) })} className="w-full bg-slate-800 border border-slate-600 rounded px-2 py-1.5 text-sm text-white focus:border-orange-500 outline-none" placeholder="0" />
                       </div>
                       <div>
                         <label className="text-[10px] text-slate-400 font-bold block mb-1">Targeted Official (Off-scene)</label>
-                        <input type="number" min="0" value={scenarioState.officerAttackCountTargeted} onChange={(e) => onUpdate({ officerAttackCountTargeted: e.target.value === '' ? '' : parseInt(e.target.value) })} className="w-full bg-slate-900 border border-slate-600 rounded px-2 py-1.5 text-sm text-white focus:border-blue-500 outline-none" placeholder="0" />
+                        <input type="number" min="0" value={scenarioState.officerAttackCountTargeted} onChange={(e) => onUpdate({ officerAttackCountTargeted: e.target.value === '' ? '' : parseInt(e.target.value) })} className="w-full bg-slate-800 border border-slate-600 rounded px-2 py-1.5 text-sm text-white focus:border-blue-500 outline-none" placeholder="0" />
                       </div>
                     </div>
                   </div>

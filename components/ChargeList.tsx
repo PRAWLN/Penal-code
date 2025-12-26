@@ -50,12 +50,12 @@ ${charges.map(c => `- ${c.charge.title} ${c.count > 1 ? `(x${c.count})` : ''}`).
   // Narrative Generator Logic
   const narrative = useMemo(() => {
     const lines: string[] = [];
-    const { incidentType: incidents, fleeing, suspectDriver, recklessEvasionDamage, driverSpeed, speedLimit, hasHostages, hostageCount, robberyInjury, hostageRole, boostGpsDisabled, boostVehicleDestroyed, boostIntentToKeep, trafficVehicleDestroyed, vehicleSwaps, stolenRecovered, stolenDestroyed, drugManufacturingType } = scenarioState;
+    const { incidentType: incidents, fleeing, suspectDriver, recklessEvasionDamage, driverSpeed, speedLimit, hasHostages, hostageCount, robberyInjury, hostageRole, boostGpsDisabled, boostVehicleDestroyed, boostIntentToKeep, trafficVehicleDestroyed, vehicleSwaps, stolenRecovered, stolenDestroyed, drugManufacturingType, beStolenGoods, beIntentTools, beHarm, beFirearmUsed } = scenarioState;
 
     if (incidents.length === 0 && !scenarioState.drugsFound) return "No active scenario triggers detected. Please select incidents to generate narrative.";
 
     // 1. Core Incident & Robberies
-    const robberyIds = ['money_loan', 'comic_store', 'pdm_alarm', 'break_and_enter', 'warehouse_robbery', 'humane_labs', 'bank_truck'];
+    const robberyIds = ['money_loan', 'comic_store', 'pdm_alarm', 'warehouse_robbery', 'humane_labs', 'bank_truck'];
     const activeRobberies = incidents.filter(i => robberyIds.includes(i));
     
     if (activeRobberies.length > 0) {
@@ -69,6 +69,29 @@ ${charges.map(c => `- ${c.charge.title} ${c.count > 1 ? `(x${c.count})` : ''}`).
           const interaction = hostageRole === 'principal' ? "directly taking them hostage" : "being an accessory at the scene";
           lines.push(`During the robbery, ${hostageCount} hostage(s) were held, who remained ${condition}. Suspect was involved by ${interaction}.`);
        }
+    }
+
+    // Break and Enter Narrative
+    if (incidents.includes('break_and_enter')) {
+        let beSummary = "Suspect was apprehended for a Break and Enter incident.";
+        if (beStolenGoods || beIntentTools) {
+            if (beStolenGoods) {
+                beSummary += " Clear intent to rob was established through possession of stolen items.";
+            } else {
+                beSummary += " Intent to rob was established through possession of burglary tools and surrounding circumstances.";
+            }
+            
+            if (beHarm) {
+                const isAttemptedAgg = !beStolenGoods && beIntentTools && beFirearmUsed;
+                beSummary += ` Incident escalated to ${isAttemptedAgg ? "Aggravated Attempted Robbery" : "Aggravated Robbery"} as locals inside the property were harmed${beFirearmUsed ? " with a firearm" : ""}.`;
+            }
+        } else {
+            beSummary += " No direct evidence of intent to steal was found; incident processed as unlawful trespassing.";
+            if (beHarm) {
+                beSummary += ` However, the incident involved physical harm to locals${beFirearmUsed ? " using a firearm, resulting in additional weapons charges" : ""}.`;
+            }
+        }
+        lines.push(beSummary);
     }
 
     // Drug Manufacturing Narrative

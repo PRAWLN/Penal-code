@@ -70,6 +70,12 @@ export interface ScenarioState {
   warehouseStolenGoods: boolean;
   humaneLabsStolenGoods: boolean;
 
+  // Break and Enter Specifics
+  beStolenGoods: boolean;
+  beIntentTools: boolean;
+  beHarm: boolean;
+  beFirearmUsed: boolean;
+
   officerAttack: boolean;
   officerAttackGSR: boolean;
   

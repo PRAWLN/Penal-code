@@ -43,6 +43,10 @@ export default function App() {
     robberyStolenGoods: true,
     warehouseStolenGoods: true,
     humaneLabsStolenGoods: true,
+    beStolenGoods: false,
+    beIntentTools: false,
+    beHarm: false,
+    beFirearmUsed: false,
     officerAttack: false,
     officerAttackGSR: false, 
     officerAttackCountWeapon: '',
@@ -141,7 +145,6 @@ export default function App() {
         let joyridingCount = 0;
         let gtaCount = 0;
         
-        // Boost Specific Logic
         if (incidents.includes('boost')) {
            const isGtaBoost = scenarioState.boostGpsDisabled === true || 
                              scenarioState.boostVehicleDestroyed === true || 
@@ -155,13 +158,11 @@ export default function App() {
            else if (isJoyBoost) joyridingCount += 1;
         }
 
-        // Stolen Vehicle (Traffic Stop) Logic
         if (incidents.includes('traffic_joyriding')) {
             if (scenarioState.trafficVehicleDestroyed === false) joyridingCount += 1;
             else if (scenarioState.trafficVehicleDestroyed === true) gtaCount += 1;
         }
 
-        // Swap Vehicles Logic
         if (scenarioState.vehicleSwaps) {
             joyridingCount += Number(scenarioState.stolenRecovered) || 0;
             gtaCount += Number(scenarioState.stolenDestroyed) || 0;
@@ -181,7 +182,6 @@ export default function App() {
          add('criminal_use_of_a_firearm_principal_2');
        } else if (victim === 'animal') {
          add('criminal_use_of_a_firearm_principal_2');
-         // animal_cruelty_principal is usually added based on Hunting Violation UI
        } else if (victim === 'civilian') {
          const count = Number(scenarioState.shotsFiredVictimCount) || 1;
          add(`aggravated_assault_and_battery_${role}`, count);
@@ -213,7 +213,34 @@ export default function App() {
        add('aggravated_robbery_principal');
     }
 
-    if (incidents.includes('comic_store') || incidents.includes('money_loan') || incidents.includes('pdm_alarm') || incidents.includes('break_and_enter')) {
+    // Specific Break and Enter logic
+    if (incidents.includes('break_and_enter')) {
+        const { beStolenGoods, beIntentTools, beHarm, beFirearmUsed } = scenarioState;
+
+        if (beStolenGoods) {
+            if (beHarm) {
+                add('aggravated_robbery_principal');
+            } else {
+                add('robbery_principal');
+            }
+        } else if (beIntentTools) {
+            // Use aggravated_robbery_attempted if harm + firearm + intent/tools (but no stolen goods yet)
+            if (beHarm && beFirearmUsed) {
+                add('aggravated_robbery_attempted');
+            } else {
+                add('robbery_attempted');
+            }
+        } else {
+            add('trespassing_principal');
+            // If harm + firearm occurred without even tools/intent or goods (pure trespassing escalation)
+            if (beHarm && beFirearmUsed) {
+                add('criminal_use_of_a_firearm_principal_1');
+            }
+        }
+    }
+
+    // Generic Robbery/Alarm logic (excluding B&E)
+    if (incidents.includes('comic_store') || incidents.includes('money_loan') || incidents.includes('pdm_alarm')) {
         const hasInjury = scenarioState.robberyInjury || (incidents.includes('shots_fired') && ['local', 'civilian', 'govt'].includes(scenarioState.shotsFiredVictim));
         if (scenarioState.robberyStolenGoods) {
             if (hasInjury) add('aggravated_robbery_principal');
@@ -247,7 +274,6 @@ export default function App() {
         else add('humane_labs_robbery_accessory');
     }
 
-    // Universal Hostage Logic for specified incidents
     const hostageIncidents = ['money_loan', 'pdm_alarm', 'warehouse_robbery', 'comic_store', 'break_and_enter', 'drug_trafficking_incident', 'humane_labs', 'air_drops', 'bank_truck'];
     const hasAnyHostageIncident = incidents.some(it => hostageIncidents.includes(it));
     
@@ -261,7 +287,6 @@ export default function App() {
 
     if (incidents.includes('littering')) {
         const itemQty = Number(scenarioState.litteringItemCount) || 1;
-        // Cap items at 5 to enforce the max fine listed in description ($1250/$2500)
         const cappedQty = Math.min(itemQty, 5);
         if (scenarioState.litteringRepeated) {
             add('littering_principal_1', cappedQty);
