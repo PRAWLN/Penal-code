@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { FleeingType, ScenarioState, ShotsFiredVictim } from '../types';
 import { 
@@ -214,7 +213,11 @@ export const ScenarioSelector: React.FC<ScenarioSelectorProps> = ({
   const showRoleSection = hasVehicleCrime || scenarioState.fleeing === FleeingType.VEHICLE;
   const isRoleMissing = showRoleSection && scenarioState.suspectDriver === null;
 
-  const showHuntingDetails = scenarioState.incidentType.includes('fishing_hunting') || (scenarioState.incidentType.includes('shots_fired') && scenarioState.shotsFiredVictim === 'animal');
+  const isWildlifeMenuSelected = scenarioState.incidentType.includes('fishing_hunting');
+  const isAnimalShot = scenarioState.incidentType.includes('shots_fired') && scenarioState.shotsFiredVictim === 'animal';
+  const showWildlifeCard = isWildlifeMenuSelected || isAnimalShot;
+  const showHuntingDetails = (isWildlifeMenuSelected && scenarioState.huntingViolation) || isAnimalShot;
+  const showFishingDetails = isWildlifeMenuSelected && scenarioState.fishingViolation;
 
   return (
     <div className="flex flex-col h-full space-y-6">
@@ -383,24 +386,26 @@ export const ScenarioSelector: React.FC<ScenarioSelectorProps> = ({
         )}
 
         {/* Fishing & Hunting Details Card */}
-        {showHuntingDetails && (
+        {showWildlifeCard && (
           <div className="mt-4 p-4 bg-slate-800/50 rounded-lg border border-slate-700 animate-in fade-in slide-in-from-top-2 space-y-4">
              <h4 className="text-sm font-semibold text-blue-400 flex items-center gap-2">
               <Fish size={16} /> Wildlife Violations
             </h4>
             
-            <div className="flex gap-2 mb-4">
-              <button 
-                onClick={() => onUpdate({ fishingViolation: !scenarioState.fishingViolation })}
-                className={`flex-1 py-2 text-[10px] font-bold rounded border transition-all ${scenarioState.fishingViolation ? 'bg-blue-600 border-blue-400 text-white shadow-md' : 'bg-slate-900 border-slate-700 text-slate-500 hover:text-slate-400'}`}
-              >Fishing</button>
-              <button 
-                onClick={() => onUpdate({ huntingViolation: !scenarioState.huntingViolation })}
-                className={`flex-1 py-2 text-[10px] font-bold rounded border transition-all ${scenarioState.huntingViolation ? 'bg-orange-600 border-orange-400 text-white shadow-md' : 'bg-slate-900 border-slate-700 text-slate-500 hover:text-slate-400'}`}
-              >Hunting</button>
-            </div>
+            {isWildlifeMenuSelected && (
+              <div className="flex gap-2 mb-4">
+                <button 
+                  onClick={() => onUpdate({ fishingViolation: !scenarioState.fishingViolation })}
+                  className={`flex-1 py-2 text-[10px] font-bold rounded border transition-all ${scenarioState.fishingViolation ? 'bg-blue-600 border-blue-400 text-white shadow-md' : 'bg-slate-900 border-slate-700 text-slate-500 hover:text-slate-400'}`}
+                >Fishing</button>
+                <button 
+                  onClick={() => onUpdate({ huntingViolation: !scenarioState.huntingViolation })}
+                  className={`flex-1 py-2 text-[10px] font-bold rounded border transition-all ${scenarioState.huntingViolation ? 'bg-orange-600 border-orange-400 text-white shadow-md' : 'bg-slate-900 border-slate-700 text-slate-500 hover:text-slate-400'}`}
+                >Hunting</button>
+              </div>
+            )}
 
-            {scenarioState.fishingViolation && (
+            {showFishingDetails && (
               <div className="p-3 bg-slate-900/40 rounded border border-slate-700 space-y-3 animate-in zoom-in-95">
                 <span className="text-[10px] text-blue-400 uppercase font-bold tracking-wider">Fishing Details</span>
                 <div className="flex items-center justify-between">
@@ -451,7 +456,7 @@ export const ScenarioSelector: React.FC<ScenarioSelectorProps> = ({
               </div>
             )}
 
-            {scenarioState.huntingViolation && (
+            {showHuntingDetails && (
               <div className="p-3 bg-slate-900/40 rounded border border-slate-700 space-y-3 animate-in zoom-in-95">
                 <span className="text-[10px] text-orange-400 uppercase font-bold tracking-wider">Hunting Details</span>
                 <div className="flex items-center justify-between">
@@ -764,7 +769,7 @@ export const ScenarioSelector: React.FC<ScenarioSelectorProps> = ({
                     <div>
                       <span className="text-xs text-slate-300 block mb-2">Did chase cause significant damage?</span>
                       <div className="flex gap-2">
-                        <button onClick={() => onUpdate({ recklessEvasionDamage: false })} className={`flex-1 py-1.5 text-xs font-bold rounded transition-colors ${!scenarioState.recklessEvasionDamage ? 'bg-slate-700 text-white' : 'bg-slate-900 text-slate-500 border border-slate-700'}`}>No</button>
+                        <button onClick={() => onUpdate({ recklessEvasionDamage: false })} className={`flex-1 py-1.5 text-xs font-bold rounded transition-colors ${!scenarioState.recklessEvasionDamage ? 'bg-slate-700 text-white' : 'bg-slate-900 text-slate-400 border border-slate-700'}`}>No</button>
                         <button onClick={() => onUpdate({ recklessEvasionDamage: true })} className={`flex-1 py-1.5 text-xs font-bold rounded transition-colors ${scenarioState.recklessEvasionDamage ? 'bg-red-600 text-white' : 'bg-slate-900 text-slate-500 border border-slate-700'}`}>Yes (Reckless)</button>
                       </div>
                     </div>
@@ -773,7 +778,7 @@ export const ScenarioSelector: React.FC<ScenarioSelectorProps> = ({
                       <div className="pt-2">
                         <span className="text-xs text-slate-300 block mb-2 flex items-center gap-1">Any documented getaway swaps?</span>
                         <div className="flex gap-2 mb-3">
-                          <button onClick={() => handleVehicleSwapsChange(false)} className={`flex-1 py-1.5 text-xs font-bold rounded transition-colors ${!scenarioState.vehicleSwaps ? 'bg-slate-700 text-white' : 'bg-slate-900 text-slate-500 border border-slate-700'}`}>No</button>
+                          <button onClick={() => handleVehicleSwapsChange(false)} className={`flex-1 py-1.5 text-xs font-bold rounded transition-colors ${!scenarioState.vehicleSwaps ? 'bg-slate-700 text-white' : 'bg-slate-900 text-slate-400 border border-slate-700'}`}>No</button>
                           <button onClick={() => handleVehicleSwapsChange(true)} className={`flex-1 py-1.5 text-xs font-bold rounded transition-colors ${scenarioState.vehicleSwaps ? 'bg-red-600 text-white' : 'bg-slate-900 text-slate-500 border border-slate-700'}`}>Yes</button>
                         </div>
                         {scenarioState.vehicleSwaps && (
@@ -822,7 +827,7 @@ export const ScenarioSelector: React.FC<ScenarioSelectorProps> = ({
                       <span className="text-xs text-slate-400 font-bold block mb-2">Did suspect attack/test positive for GSR?</span>
                       <div className="flex gap-2">
                         <button onClick={() => onUpdate({ officerAttackGSR: true })} className={`flex-1 py-1.5 text-xs font-bold rounded transition-colors ${scenarioState.officerAttackGSR ? 'bg-blue-600 text-white' : 'bg-slate-900 text-slate-400 border border-slate-700'}`}>Yes (Principal)</button>
-                        <button onClick={() => onUpdate({ officerAttackGSR: false })} className={`flex-1 py-1.5 text-xs font-bold rounded transition-colors ${!scenarioState.officerAttackGSR ? 'bg-slate-600 text-white' : 'bg-slate-900 text-slate-400 border border-slate-700'}`}>No (Accessory)</button>
+                        <button onClick={() => onUpdate({ officerAttackGSR: false })} className={`flex-1 py-1.5 text-xs font-bold rounded transition-colors ${!scenarioState.officerAttackGSR ? 'bg-slate-700 text-white' : 'bg-slate-900 text-slate-400 border border-slate-700'}`}>No (Accessory)</button>
                       </div>
                     </div>
                     <div className="grid grid-cols-1 gap-3 pt-2">

@@ -302,10 +302,10 @@ export default function App() {
     }
 
     // 7. Fishing & Hunting
-    // Appear if Hunting Violation selected OR Shots Fired at Animal
-    const triggerHunting = incidents.includes('fishing_hunting') || (incidents.includes('shots_fired') && scenarioState.shotsFiredVictim === 'animal');
-    
-    if (triggerHunting && scenarioState.fishingViolation) {
+    const isWildlifeMenuSelected = incidents.includes('fishing_hunting');
+    const isAnimalShot = incidents.includes('shots_fired') && scenarioState.shotsFiredVictim === 'animal';
+
+    if (isWildlifeMenuSelected && scenarioState.fishingViolation) {
         if (!scenarioState.fishingHasLicense) {
             if (scenarioState.fishingOffenseNumber === 3) add('fishing_without_a_license_principal_1');
             else if (scenarioState.fishingOffenseNumber === 2) add('fishing_without_a_license_principal_2');
@@ -317,7 +317,7 @@ export default function App() {
         }
     }
 
-    if (triggerHunting && scenarioState.huntingViolation) {
+    if ((isWildlifeMenuSelected && scenarioState.huntingViolation) || isAnimalShot) {
         if (!scenarioState.huntingInZone) add('poaching_principal');
         else if (!scenarioState.huntingHasLicense || !scenarioState.huntingProperWeapon) add('hunting_without_a_license_or_proper_firearm_principal');
         if (scenarioState.huntingProtectedSpecies) add('illegal_poaching_principal');
