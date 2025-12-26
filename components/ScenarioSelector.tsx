@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { FleeingType, ScenarioState, ShotsFiredVictim } from '../types';
 import { 
@@ -20,7 +19,8 @@ import {
   Truck, 
   FlaskConical, 
   Crosshair,
-  Home
+  Home,
+  Store
 } from 'lucide-react';
 
 interface ScenarioSelectorProps {
@@ -121,7 +121,7 @@ export const ScenarioSelector: React.FC<ScenarioSelectorProps> = ({
           update.hostageCount = '';
           update.hasHostages = false;
           update.robberyInjury = false;
-          update.robberyStolenGoods = true;
+          update.robberyStolenGoods = false;
       }
 
       if (id === 'warehouse_robbery') update.warehouseStolenGoods = true;
@@ -164,7 +164,7 @@ export const ScenarioSelector: React.FC<ScenarioSelectorProps> = ({
           update.unpaidTicketDays = '';
           update.warehouseStolenGoods = true;
           update.humaneLabsStolenGoods = true;
-          update.robberyStolenGoods = true;
+          update.robberyStolenGoods = false;
           update.boostVehicleDestroyed = null;
           update.boostGpsDisabled = null;
           update.boostIntentToKeep = null;
@@ -228,6 +228,8 @@ export const ScenarioSelector: React.FC<ScenarioSelectorProps> = ({
   const showHuntingDetails = (isWildlifeMenuSelected && scenarioState.huntingViolation) || isAnimalShot;
   const showFishingDetails = isWildlifeMenuSelected && scenarioState.fishingViolation;
 
+  const robberyAlarmsSelected = scenarioState.incidentType.some(it => ['comic_store', 'pdm_alarm', 'money_loan'].includes(it));
+
   return (
     <div className="flex flex-col h-full space-y-6">
       <div className="flex-1 overflow-y-auto pr-2 space-y-6">
@@ -262,6 +264,34 @@ export const ScenarioSelector: React.FC<ScenarioSelectorProps> = ({
             ))}
           </div>
         </div>
+
+        {/* Robbery Alarm Details Card (Comic, PDM, Money Loan) */}
+        {robberyAlarmsSelected && (
+          <div className="mt-4 p-4 bg-slate-800/50 rounded-lg border border-slate-700 animate-in fade-in slide-in-from-top-2 space-y-4">
+             <h4 className="text-sm font-semibold text-blue-400 flex items-center gap-2">
+              <Store size={16} /> Robbery Alarm Details
+            </h4>
+            <div className="space-y-5">
+              <div className="space-y-2">
+                <span className="text-xs text-slate-300 block">Did the suspect participate in the robbery or found with stolen goods?</span>
+                <div className="flex gap-2">
+                  <button onClick={() => onUpdate({ robberyStolenGoods: true })} className={`flex-1 py-1.5 text-xs font-bold rounded transition-colors ${scenarioState.robberyStolenGoods ? 'bg-blue-600 text-white' : 'bg-slate-900 text-slate-500 border border-slate-700'}`}>Yes</button>
+                  <button onClick={() => onUpdate({ robberyStolenGoods: false })} className={`flex-1 py-1.5 text-xs font-bold rounded transition-colors ${!scenarioState.robberyStolenGoods ? 'bg-slate-700 text-white' : 'bg-slate-900 text-slate-500 border border-slate-700'}`}>No</button>
+                </div>
+              </div>
+
+              {scenarioState.robberyStolenGoods && (
+                <div className="space-y-2 animate-in slide-in-from-top-1">
+                  <span className="text-xs text-slate-300 block">Was the victim, a hostage, or a third party injured by a weapon during the robbery?</span>
+                  <div className="flex gap-2">
+                    <button onClick={() => onUpdate({ robberyInjury: true })} className={`flex-1 py-1.5 text-xs font-bold rounded transition-colors ${scenarioState.robberyInjury ? 'bg-red-600 text-white' : 'bg-slate-900 text-slate-500 border border-slate-700'}`}>Yes</button>
+                    <button onClick={() => onUpdate({ robberyInjury: false })} className={`flex-1 py-1.5 text-xs font-bold rounded transition-colors ${!scenarioState.robberyInjury ? 'bg-slate-700 text-white' : 'bg-slate-900 text-slate-500 border border-slate-700'}`}>No</button>
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
+        )}
 
         {/* Break and Enter Card */}
         {scenarioState.incidentType.includes('break_and_enter') && (
@@ -722,10 +752,10 @@ export const ScenarioSelector: React.FC<ScenarioSelectorProps> = ({
                 <div className="flex gap-2">
                   <button
                     onClick={() => onUpdate({ boostIntentToKeep: false })}
-                    className={`flex-1 py-1.5 text-[10px] font-bold uppercase rounded transition-colors ${scenarioState.boostIntentToKeep === false ? 'bg-blue-600 text-white' : 'bg-slate-900 text-slate-400 border border-slate-700'}`}>No</button>
+                    className={`flex-1 py-1.5 text-[10px] font-bold uppercase rounded transition-colors ${scenarioState.boostIntentToKeep === false ? 'bg-blue-600 text-white' : 'bg-slate-900 text-slate-500 border border-slate-700'}`}>No</button>
                   <button
                     onClick={() => onUpdate({ boostIntentToKeep: true })}
-                    className={`flex-1 py-1.5 text-[10px] font-bold uppercase rounded transition-colors ${scenarioState.boostIntentToKeep === true ? 'bg-red-600 text-white' : 'bg-slate-900 text-slate-400 border border-slate-700'}`}>Yes</button>
+                    className={`flex-1 py-1.5 text-[10px] font-bold uppercase rounded transition-colors ${scenarioState.boostIntentToKeep === true ? 'bg-red-600 text-white' : 'bg-slate-900 text-slate-500 border border-slate-700'}`}>Yes</button>
                 </div>
               </div>
             </div>

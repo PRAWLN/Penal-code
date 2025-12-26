@@ -50,7 +50,7 @@ ${charges.map(c => `- ${c.charge.title} ${c.count > 1 ? `(x${c.count})` : ''}`).
   // Narrative Generator Logic
   const narrative = useMemo(() => {
     const lines: string[] = [];
-    const { incidentType: incidents, fleeing, suspectDriver, recklessEvasionDamage, driverSpeed, speedLimit, hasHostages, hostageCount, robberyInjury, hostageRole, boostGpsDisabled, boostVehicleDestroyed, boostIntentToKeep, trafficVehicleDestroyed, vehicleSwaps, stolenRecovered, stolenDestroyed, drugManufacturingType, beStolenGoods, beIntentTools, beHarm, beFirearmUsed } = scenarioState;
+    const { incidentType: incidents, fleeing, suspectDriver, recklessEvasionDamage, driverSpeed, speedLimit, hasHostages, hostageCount, robberyInjury, hostageRole, boostGpsDisabled, boostVehicleDestroyed, boostIntentToKeep, trafficVehicleDestroyed, vehicleSwaps, stolenRecovered, stolenDestroyed, drugManufacturingType, beStolenGoods, beIntentTools, beHarm, beFirearmUsed, robberyStolenGoods } = scenarioState;
 
     if (incidents.length === 0 && !scenarioState.drugsFound) return "No active scenario triggers detected. Please select incidents to generate narrative.";
 
@@ -64,10 +64,23 @@ ${charges.map(c => `- ${c.charge.title} ${c.count > 1 ? `(x${c.count})` : ''}`).
          lines.push(`Suspect was involved in a ${label} incident.`);
        });
 
+       // Specific logic for Alarms (Comic, PDM, Money Loan)
+       const alarmIncidents = incidents.filter(i => ['money_loan', 'comic_store', 'pdm_alarm'].includes(i));
+       if (alarmIncidents.length > 0) {
+          if (robberyStolenGoods) {
+            lines.push(`Suspect was witnessed participating in the robbery or was found in possession of stolen goods at the scene.`);
+            if (robberyInjury) {
+                lines.push(`The incident escalated to Aggravated Robbery as a victim, hostage, or bystander was injured by a weapon.`);
+            }
+          } else {
+            lines.push(`Suspect was present at the robbery scene but no direct evidence of participation or stolen goods was found.`);
+          }
+       }
+
        if (hasHostages && Number(hostageCount) > 0) {
           const condition = (robberyInjury || scenarioState.shotsFiredVictim !== 'none') ? "injured" : "unharmed";
           const interaction = hostageRole === 'principal' ? "directly taking them hostage" : "being an accessory at the scene";
-          lines.push(`During the robbery, ${hostageCount} hostage(s) were held, who remained ${condition}. Suspect was involved by ${interaction}.`);
+          lines.push(`During the incident, ${hostageCount} hostage(s) were held, who remained ${condition}. Suspect was involved by ${interaction}.`);
        }
     }
 

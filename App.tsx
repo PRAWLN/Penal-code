@@ -40,7 +40,7 @@ export default function App() {
     hasHostages: false,
     hostageRole: 'principal',
     robberyInjury: false,
-    robberyStolenGoods: true,
+    robberyStolenGoods: false,
     warehouseStolenGoods: true,
     humaneLabsStolenGoods: true,
     beStolenGoods: false,
@@ -224,7 +224,6 @@ export default function App() {
                 add('robbery_principal');
             }
         } else if (beIntentTools) {
-            // Use aggravated_robbery_attempted if harm + firearm + intent/tools (but no stolen goods yet)
             if (beHarm && beFirearmUsed) {
                 add('aggravated_robbery_attempted');
             } else {
@@ -232,23 +231,25 @@ export default function App() {
             }
         } else {
             add('trespassing_principal');
-            // If harm + firearm occurred without even tools/intent or goods (pure trespassing escalation)
             if (beHarm && beFirearmUsed) {
                 add('criminal_use_of_a_firearm_principal_1');
             }
         }
     }
 
-    // Generic Robbery/Alarm logic (excluding B&E)
+    // Robbery/Alarm logic for Comic Store, Money Loan, PDM Alarm
     if (incidents.includes('comic_store') || incidents.includes('money_loan') || incidents.includes('pdm_alarm')) {
-        const hasInjury = scenarioState.robberyInjury || (incidents.includes('shots_fired') && ['local', 'civilian', 'govt'].includes(scenarioState.shotsFiredVictim));
-        if (scenarioState.robberyStolenGoods) {
-            if (hasInjury) add('aggravated_robbery_principal');
-            else add('robbery_principal');
-        } else {
-            if (hasInjury) add('aggravated_robbery_accessory');
-            else add('robbery_accessory');
+        const participated = scenarioState.robberyStolenGoods;
+        const injured = scenarioState.robberyInjury;
+        
+        if (participated) {
+            if (injured) {
+                add('aggravated_robbery_principal');
+            } else {
+                add('robbery_principal');
+            }
         }
+        // If participated is No, add no charge as per user request.
     }
 
     if (incidents.includes('drug_trafficking_incident')) {
