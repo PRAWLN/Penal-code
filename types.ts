@@ -56,6 +56,8 @@ export interface ScenarioState {
 
   shotsFiredVictim: ShotsFiredVictim;
   shotsFiredVictimCount: number | '';
+  shotsFiredGovtOnSceneCount: number | '';
+  shotsFiredGovtOffSceneCount: number | '';
   shotsFiredGovtActive: boolean;
   shotsFiredRole: 'principal' | 'accessory';
 

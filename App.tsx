@@ -32,6 +32,8 @@ export default function App() {
     vehicleTheftAccessoryDestroyed: '',
     shotsFiredVictim: 'none',
     shotsFiredVictimCount: '',
+    shotsFiredGovtOnSceneCount: '',
+    shotsFiredGovtOffSceneCount: '',
     shotsFiredGovtActive: false,
     shotsFiredRole: 'principal',
     hostageCount: '',
@@ -174,21 +176,24 @@ export default function App() {
     if (incidents.includes('shots_fired')) {
        const victim = scenarioState.shotsFiredVictim;
        const role = scenarioState.shotsFiredRole;
-       const count = Number(scenarioState.shotsFiredVictimCount) || 1;
-       if (victim === 'local' || victim === 'none') add('criminal_use_of_a_firearm_principal_2');
-       else if (victim === 'animal') {
-         add('animal_cruelty_principal');
+       
+       if (victim === 'local' || victim === 'none') {
          add('criminal_use_of_a_firearm_principal_2');
+       } else if (victim === 'animal') {
+         add('criminal_use_of_a_firearm_principal_2');
+         // animal_cruelty_principal is usually added based on Hunting Violation UI
        } else if (victim === 'civilian') {
-         if (role === 'principal') add('aggravated_assault_and_battery_principal', count);
-         else add('aggravated_assault_and_battery_accessory', count);
+         const count = Number(scenarioState.shotsFiredVictimCount) || 1;
+         add(`aggravated_assault_and_battery_${role}`, count);
        } else if (victim === 'govt') {
-         if (scenarioState.shotsFiredGovtActive) {
-            if (role === 'principal') add('aggravated_assault_and_battery_principal', count);
-            else add('aggravated_assault_and_battery_accessory', count);
-         } else {
-            if (role === 'principal') add('assault_on_a_government_official_principal', count);
-            else add('assault_on_a_government_official_accessory', count);
+         const onScene = Number(scenarioState.shotsFiredGovtOnSceneCount) || 0;
+         const offScene = Number(scenarioState.shotsFiredGovtOffSceneCount) || 0;
+         
+         if (onScene > 0) {
+            add(`aggravated_assault_and_battery_${role}`, onScene);
+         }
+         if (offScene > 0) {
+            add(`assault_on_a_government_official_${role}`, offScene);
          }
        }
     }
@@ -297,21 +302,22 @@ export default function App() {
     }
 
     // 7. Fishing & Hunting
-    if (incidents.includes('fishing_hunting') && scenarioState.fishingViolation) {
+    // Appear if Hunting Violation selected OR Shots Fired at Animal
+    const triggerHunting = incidents.includes('fishing_hunting') || (incidents.includes('shots_fired') && scenarioState.shotsFiredVictim === 'animal');
+    
+    if (triggerHunting && scenarioState.fishingViolation) {
         if (!scenarioState.fishingHasLicense) {
             if (scenarioState.fishingOffenseNumber === 3) add('fishing_without_a_license_principal_1');
             else if (scenarioState.fishingOffenseNumber === 2) add('fishing_without_a_license_principal_2');
             else add('fishing_without_a_license_principal_3');
         }
 
-        // Illegal Fish Handling Diagnostic
-        // "Possession of live fish outside an approved fish cooler while not actively fishing."
         if (scenarioState.fishLivePossession && !scenarioState.fishInApprovedContainer && !scenarioState.activelyFishing) {
             add('illegal_fish_handling_principal');
         }
     }
 
-    if (incidents.includes('fishing_hunting') && scenarioState.huntingViolation) {
+    if (triggerHunting && scenarioState.huntingViolation) {
         if (!scenarioState.huntingInZone) add('poaching_principal');
         else if (!scenarioState.huntingHasLicense || !scenarioState.huntingProperWeapon) add('hunting_without_a_license_or_proper_firearm_principal');
         if (scenarioState.huntingProtectedSpecies) add('illegal_poaching_principal');

@@ -1,6 +1,26 @@
+
 import React from 'react';
-import { FleeingType, ScenarioState } from '../types';
-import { Car, User, AlertTriangle, Siren, RefreshCcw, Briefcase, Ticket, ShieldAlert, Gauge, PackageSearch, Info, Target, Users, Fish, Trash2, Truck, FlaskConical } from 'lucide-react';
+import { FleeingType, ScenarioState, ShotsFiredVictim } from '../types';
+import { 
+  Car, 
+  User, 
+  AlertTriangle, 
+  Siren, 
+  RefreshCcw, 
+  Briefcase, 
+  Ticket, 
+  ShieldAlert, 
+  Gauge, 
+  PackageSearch, 
+  Info, 
+  Target, 
+  Users, 
+  Fish, 
+  Trash2, 
+  Truck, 
+  FlaskConical, 
+  Crosshair 
+} from 'lucide-react';
 
 interface ScenarioSelectorProps {
   scenarioState: ScenarioState;
@@ -63,6 +83,8 @@ export const ScenarioSelector: React.FC<ScenarioSelectorProps> = ({
       if (id === 'shots_fired') {
         update.shotsFiredVictim = 'none';
         update.shotsFiredVictimCount = '';
+        update.shotsFiredGovtOnSceneCount = '';
+        update.shotsFiredGovtOffSceneCount = '';
         update.shotsFiredGovtActive = false;
         update.shotsFiredRole = 'principal';
       }
@@ -192,6 +214,8 @@ export const ScenarioSelector: React.FC<ScenarioSelectorProps> = ({
   const showRoleSection = hasVehicleCrime || scenarioState.fleeing === FleeingType.VEHICLE;
   const isRoleMissing = showRoleSection && scenarioState.suspectDriver === null;
 
+  const showHuntingDetails = scenarioState.incidentType.includes('fishing_hunting') || (scenarioState.incidentType.includes('shots_fired') && scenarioState.shotsFiredVictim === 'animal');
+
   return (
     <div className="flex flex-col h-full space-y-6">
       <div className="flex-1 overflow-y-auto pr-2 space-y-6">
@@ -226,6 +250,80 @@ export const ScenarioSelector: React.FC<ScenarioSelectorProps> = ({
             ))}
           </div>
         </div>
+
+        {/* Shots Fired Details Card */}
+        {scenarioState.incidentType.includes('shots_fired') && (
+          <div className="mt-4 p-4 bg-slate-800/50 rounded-lg border border-slate-700 animate-in fade-in slide-in-from-top-2 space-y-4">
+             <h4 className="text-sm font-semibold text-blue-400 flex items-center gap-2">
+              <Crosshair size={16} /> Shots Fired Investigation
+            </h4>
+            <div className="space-y-4">
+               <div className="space-y-2">
+                 <span className="text-xs text-slate-300 font-bold uppercase tracking-wider block">Who / What was shot?</span>
+                 <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+                    {[
+                      { id: 'none', label: 'None/Object' },
+                      { id: 'animal', label: 'Animal' },
+                      { id: 'local', label: 'Local (NPC)' },
+                      { id: 'civilian', label: 'Civilian' },
+                      { id: 'govt', label: 'Govt Employee' },
+                    ].map(opt => (
+                      <button 
+                        key={opt.id}
+                        onClick={() => onUpdate({ shotsFiredVictim: opt.id as ShotsFiredVictim })} 
+                        className={`py-2 text-[10px] font-bold rounded border transition-all ${scenarioState.shotsFiredVictim === opt.id ? 'bg-blue-600 border-blue-400 text-white shadow-md' : 'bg-slate-900 border-slate-700 text-slate-500 hover:text-slate-400'}`}
+                      >{opt.label}</button>
+                    ))}
+                 </div>
+               </div>
+
+               {scenarioState.shotsFiredVictim === 'civilian' && (
+                 <div className="p-3 bg-slate-900/40 rounded border border-slate-700 space-y-3 animate-in zoom-in-95">
+                    <div className="flex items-center justify-between">
+                       <label className="text-[11px] text-slate-300">How many victims were shot?</label>
+                       <input 
+                         type="number" 
+                         min="1"
+                         placeholder="1"
+                         className="w-16 bg-slate-800 border border-slate-600 rounded px-2 py-1 text-xs text-white outline-none focus:border-blue-500" 
+                         value={scenarioState.shotsFiredVictimCount} 
+                         onChange={e => onUpdate({ shotsFiredVictimCount: e.target.value === '' ? '' : parseInt(e.target.value) })} 
+                       />
+                    </div>
+                 </div>
+               )}
+
+               {scenarioState.shotsFiredVictim === 'govt' && (
+                 <div className="p-3 bg-slate-900/40 rounded border border-slate-700 space-y-4 animate-in zoom-in-95">
+                    <div className="space-y-3">
+                      <div className="flex items-center justify-between gap-4">
+                        <label className="text-[11px] text-slate-300 flex-1 leading-tight">Victims engaged in active enforcement at scene?</label>
+                        <input 
+                          type="number" 
+                          min="0"
+                          placeholder="0"
+                          className="w-16 bg-slate-800 border border-slate-600 rounded px-2 py-1 text-xs text-white outline-none focus:border-blue-500 flex-none" 
+                          value={scenarioState.shotsFiredGovtOnSceneCount} 
+                          onChange={e => onUpdate({ shotsFiredGovtOnSceneCount: e.target.value === '' ? '' : parseInt(e.target.value) })} 
+                        />
+                      </div>
+                      <div className="flex items-center justify-between gap-4">
+                        <label className="text-[11px] text-slate-300 flex-1 leading-tight">Victims NOT performing active enforcement/Off-scene?</label>
+                        <input 
+                          type="number" 
+                          min="0"
+                          placeholder="0"
+                          className="w-16 bg-slate-800 border border-slate-600 rounded px-2 py-1 text-xs text-white outline-none focus:border-blue-500 flex-none" 
+                          value={scenarioState.shotsFiredGovtOffSceneCount} 
+                          onChange={e => onUpdate({ shotsFiredGovtOffSceneCount: e.target.value === '' ? '' : parseInt(e.target.value) })} 
+                        />
+                      </div>
+                    </div>
+                 </div>
+               )}
+            </div>
+          </div>
+        )}
 
         {/* Drug Manufacturing Card */}
         {scenarioState.incidentType.includes('drug_manufacturing') && (
@@ -285,7 +383,7 @@ export const ScenarioSelector: React.FC<ScenarioSelectorProps> = ({
         )}
 
         {/* Fishing & Hunting Details Card */}
-        {scenarioState.incidentType.includes('fishing_hunting') && (
+        {showHuntingDetails && (
           <div className="mt-4 p-4 bg-slate-800/50 rounded-lg border border-slate-700 animate-in fade-in slide-in-from-top-2 space-y-4">
              <h4 className="text-sm font-semibold text-blue-400 flex items-center gap-2">
               <Fish size={16} /> Wildlife Violations
