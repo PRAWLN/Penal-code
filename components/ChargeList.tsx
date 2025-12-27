@@ -50,7 +50,7 @@ ${charges.map(c => `- ${c.charge.title} ${c.count > 1 ? `(x${c.count})` : ''}`).
   // Narrative Generator Logic
   const narrative = useMemo(() => {
     const lines: string[] = [];
-    const { incidentType: incidents, fleeing, suspectDriver, recklessEvasionDamage, driverSpeed, speedLimit, hasHostages, hostageCount, robberyInjury, hostageRole, boostGpsDisabled, boostVehicleDestroyed, boostIntentToKeep, trafficVehicleDestroyed, vehicleSwaps, stolenRecovered, stolenDestroyed, drugManufacturingType, beStolenGoods, beIntentTools, beHarm, beFirearmUsed, robberyStolenGoods } = scenarioState;
+    const { incidentType: incidents, fleeing, suspectDriver, recklessEvasionDamage, driverSpeed, speedLimit, hasHostages, hostageCount, robberyInjury, hostageRole, boostGpsDisabled, boostVehicleDestroyed, boostIntentToKeep, trafficVehicleDestroyed, vehicleSwaps, stolenRecovered, stolenDestroyed, drugManufacturingType, beStolenGoods, beIntentTools, beHarm, beFirearmUsed, robberyStolenGoods, litteringRepeated, litteringItemCount } = scenarioState;
 
     if (incidents.length === 0 && !scenarioState.drugsFound) return "No active scenario triggers detected. Please select incidents to generate narrative.";
 
@@ -82,6 +82,16 @@ ${charges.map(c => `- ${c.charge.title} ${c.count > 1 ? `(x${c.count})` : ''}`).
           const interaction = hostageRole === 'principal' ? "directly taking them hostage" : "being an accessory at the scene";
           lines.push(`During the incident, ${hostageCount} hostage(s) were held, who remained ${condition}. Suspect was involved by ${interaction}.`);
        }
+    }
+
+    // Littering Narrative
+    if (incidents.includes('littering')) {
+      const items = litteringItemCount || 0;
+      let litterLine = `Suspect was witnessed littering. They dropped ${items} item(s).`;
+      if (litteringRepeated) {
+        litterLine += ` The suspect has been charged 5+ times for littering so this has been upgraded to a misdemeanor.`;
+      }
+      lines.push(litterLine);
     }
 
     // Break and Enter Narrative
