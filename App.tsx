@@ -3,6 +3,7 @@ import { Charge, ChargeCategory, FleeingType, ScenarioState } from './types';
 import { PENAL_CODE } from './data/penalCode';
 import { ScenarioSelector } from './components/ScenarioSelector';
 import { ChargeList } from './components/ChargeList';
+import { DisclaimerModal } from './components/DisclaimerModal';
 import { Shield, Search, Menu, X } from 'lucide-react';
 
 export default function App() {
@@ -10,6 +11,7 @@ export default function App() {
   const [ignoredChargeIds, setIgnoredChargeIds] = useState<string[]>([]);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
+  const [showDisclaimer, setShowDisclaimer] = useState(true);
 
   const [scenarioState, setScenarioState] = useState<ScenarioState>({
     incidentType: [],
@@ -432,6 +434,8 @@ export default function App() {
 
   return (
     <div className="flex flex-col h-screen bg-slate-900 text-slate-100 overflow-hidden">
+      {showDisclaimer && <DisclaimerModal onConfirm={() => setShowDisclaimer(false)} />}
+      
       <header className="flex-none h-16 bg-slate-900 border-b border-slate-700 flex items-center justify-between px-6 z-[60] shadow-lg">
         <div className="flex items-center gap-3">
           <div className="bg-blue-600 p-2 rounded-lg"><Shield className="text-white w-6 h-6" /></div>
