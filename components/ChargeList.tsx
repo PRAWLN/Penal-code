@@ -47,7 +47,6 @@ export const ChargeList: React.FC<ChargeListProps> = ({ charges, onRemoveCharge,
   const totalMonths = charges.reduce((acc, curr) => acc + (curr.charge.months * curr.count), 0);
   const totalFine = charges.reduce((acc, curr) => acc + (curr.charge.fine * curr.count), 0);
 
-  // Maximum allowed reduction based on user requirements
   const maxAllowedReduction = useMemo(() => {
     if (!isGuiltyPlea) return 0;
     if (hasLawyer) return 25;
@@ -55,7 +54,6 @@ export const ChargeList: React.FC<ChargeListProps> = ({ charges, onRemoveCharge,
     return 0;
   }, [isGuiltyPlea, hasLawyer, isCommandApproved]);
 
-  // Apply cap to current reduction if conditions change
   const currentReduction = Math.min(reductionPercent, maxAllowedReduction);
 
   const reducedMonths = (reductionTarget === 'time' || reductionTarget === 'both') 
@@ -74,14 +72,14 @@ export const ChargeList: React.FC<ChargeListProps> = ({ charges, onRemoveCharge,
     if (!isGuiltyPlea) return;
     const newState = !hasLawyer;
     setHasLawyer(newState);
-    if (newState) setIsCommandApproved(false); // Mutually exclusive
+    if (newState) setIsCommandApproved(false);
   };
 
   const handleCommandToggle = () => {
     if (!isGuiltyPlea) return;
     const newState = !isCommandApproved;
     setIsCommandApproved(newState);
-    if (newState) setHasLawyer(false); // Mutually exclusive
+    if (newState) setHasLawyer(false);
   };
 
   const getChargeType = (id: string) => {
@@ -110,14 +108,136 @@ ${reductionLine}
     alert("Report copied to clipboard!");
   };
 
-  // Narrative Generator Logic (Simplified for brevity as per instructions, assuming previous logic remains valid)
+  // Enhanced Narrative Generator Logic
   const narrative = useMemo(() => {
     const lines: string[] = [];
-    const { incidentType: incidents } = scenarioState;
-    if (incidents.length === 0 && !scenarioState.drugsFound) return "No active scenario triggers detected.";
-    // ... Logic remains the same ...
-    return "MDT Automated Narrative generated based on selected incidents.";
-  }, [scenarioState]);
+    const { 
+      incidentType, fleeing, suspectDriver, recklessEvasionDamage, 
+      drugsFound, weaponPossessionClass1, weaponPossessionClass2, 
+      weaponPossessionClass3, governmentEquipmentPossession, hasHostages,
+      driverSpeed, speedLimit, trafficVehicleDestroyed, boostVehicleDestroyed,
+      boostGpsDisabled, boostIntentToKeep, vehicleSwaps, stolenRecovered,
+      stolenDestroyed, officerAttack, shotsFiredVictim, shotsFiredVictimCount,
+      hostageCount, drugMarijuanaJoints, drugMarijuanaPlants, drugCocaineBaggies,
+      drugCocaineBricks, drugMethBaggies, drugMethBricks, drugOxyCount
+    } = scenarioState;
+    
+    if (incidentType.length === 0 && charges.length === 0) {
+      return "No active scenario triggers detected. Add charges or select incident context to generate a narrative.";
+    }
+
+    lines.push("--- ARRESTING OFFICER NARRATIVE ---");
+    
+    // Initial Context
+    if (incidentType.includes('traffic_stop')) {
+      let speedDetail = "";
+      if (incidentType.includes('traffic_speeding') && driverSpeed) {
+        speedDetail = ` for a speeding violation (Recorded: ${driverSpeed} MPH in a ${speedLimit} MPH zone)`;
+      }
+      lines.push(`Officers conducted a high-risk traffic stop on a vehicle${speedDetail}.`);
+    } else if (incidentType.includes('shots_fired')) {
+      lines.push("Units were dispatched to a shots fired call in the vicinity.");
+    } else if (incidentType.includes('bank_truck')) {
+      lines.push("Responding units engaged a suspected group robbing a heavy-armored bank transport.");
+    } else if (incidentType.includes('warehouse_robbery') || incidentType.includes('comic_store') || incidentType.includes('pdm_alarm') || incidentType.includes('money_loan')) {
+      lines.push(`Units arrived on scene to an active commercial alarm at a local establishment.`);
+    }
+
+    // Fleeing behavior & Pursuit details
+    if (fleeing === FleeingType.FOOT) {
+      lines.push("The suspect immediately exited the vehicle and led officers on a foot pursuit, disregarding verbal commands to surrender.");
+    } else if (fleeing === FleeingType.VEHICLE) {
+      const roleText = suspectDriver === 'no' ? "as a passenger" : suspectDriver === 'mixed' ? "alternating between driver and passenger" : "as the primary operator";
+      lines.push(`The suspect initiated a vehicle pursuit ${roleText}.`);
+      if (recklessEvasionDamage) {
+        lines.push("During the pursuit, the suspect demonstrated a total disregard for public safety, causing significant collateral property damage.");
+      }
+      if (vehicleSwaps) {
+        const swapText = [];
+        if (stolenRecovered) swapText.push(`${stolenRecovered} vehicle(s) recovered intact`);
+        if (stolenDestroyed) swapText.push(`${stolenDestroyed} vehicle(s) destroyed during swaps`);
+        if (swapText.length > 0) lines.push(`The suspect attempted to evade by swapping vehicles: ${swapText.join(' and ')}.`);
+      }
+    }
+
+    // Vehicle outcomes (GTA / Joyriding)
+    if (incidentType.includes('traffic_joyriding') || incidentType.includes('boost')) {
+      const gtaType = incidentType.includes('boost') ? "boosting operation" : "stolen vehicle";
+      let outcome = "";
+      if (trafficVehicleDestroyed === true || boostVehicleDestroyed === true) outcome = "The vehicle was found destroyed/rendered unroadworthy.";
+      if (trafficVehicleDestroyed === false || boostVehicleDestroyed === false) outcome = "The vehicle was successfully recovered and returned to the owner.";
+      
+      lines.push(`Investigations confirmed the vehicle was part of an unauthorized ${gtaType}. ${outcome}`);
+      if (boostGpsDisabled) lines.push("The suspect had actively disabled the vehicle's GPS tracking system.");
+      if (boostIntentToKeep) lines.push("Evidence found at the scene indicated a clear intent to permanently deprive the owner of the asset.");
+    }
+
+    // Violent acts & Hostages
+    if (incidentType.includes('shots_fired')) {
+      if (shotsFiredVictim === 'civilian') lines.push(`The suspect opened fire on civilians, striking approximately ${shotsFiredVictimCount || 1} individual(s).`);
+      if (shotsFiredVictim === 'govt') lines.push(`The suspect targeted and opened fire upon government officials performing their duties.`);
+      if (shotsFiredVictim === 'animal') lines.push(`The suspect discharged a firearm at local wildlife.`);
+    }
+
+    if (officerAttack) {
+      lines.push(`During apprehension, the suspect engaged in a physical or armed assault against responding law enforcement.`);
+    }
+
+    if (hasHostages && hostageCount) {
+      lines.push(`The suspect utilized ${hostageCount} hostage(s) as leverage during the standoff, endangering their lives for tangible benefit.`);
+    }
+
+    // Search Results / Evidence
+    if (drugsFound || weaponPossessionClass1 || weaponPossessionClass2 || weaponPossessionClass3 || governmentEquipmentPossession) {
+      lines.push("\n--- EVIDENCE RECOVERED ---");
+      const items: string[] = [];
+      if (drugMarijuanaJoints) items.push(`${drugMarijuanaJoints} Marijuana joints`);
+      if (drugMarijuanaPlants) items.push(`${drugMarijuanaPlants} Marijuana plants/seeds`);
+      if (drugCocaineBaggies) items.push(`${drugCocaineBaggies} Cocaine baggies`);
+      if (drugCocaineBricks) items.push(`${drugCocaineBricks} Cocaine brick(s)`);
+      if (drugMethBaggies) items.push(`${drugMethBaggies} Meth baggies`);
+      if (drugMethBricks) items.push(`${drugMethBricks} Meth brick(s)`);
+      if (drugOxyCount) items.push(`${drugOxyCount} Oxycontin pills`);
+      
+      if (weaponPossessionClass1) items.push("Class 1 Firearm (Pistol/Hunting Rifle)");
+      if (weaponPossessionClass2) items.push("Class 2 Firearm (SMG/Shotgun)");
+      if (weaponPossessionClass3) items.push("Class 3 Firearm (Assault Rifle/Heavy)");
+      if (governmentEquipmentPossession) items.push("Restricted Government Property");
+      
+      if (items.length > 0) {
+        lines.push(`A search of the suspect and/or vehicle yielded the following contraband: ${items.join(', ')}.`);
+      }
+    }
+
+    // Sentence Modifiers Section
+    if (currentReduction > 0) {
+      lines.push("\n--- SENTENCE MODIFIERS ---");
+      const targetText = reductionTarget === 'both' ? "both Time and Fine" : reductionTarget === 'time' ? "Time" : "Fine";
+      const reasonParts = [];
+      if (isGuiltyPlea) reasonParts.push("a formal Guilty Plea");
+      if (hasLawyer) reasonParts.push("the presence of Legal Counsel");
+      if (isCommandApproved) reasonParts.push("authorized Command Approval");
+      
+      lines.push(`A sentence reduction of ${currentReduction}% was applied to ${targetText}.`);
+      lines.push(`Reasoning: Reduction granted based on ${reasonParts.join(' and ')}.`);
+    }
+
+    // Conclusion with Charge List
+    lines.push("\n--- CONCLUSION ---");
+    lines.push("The suspect was successfully apprehended and transported to the processing facility. Based on the documented evidence, the suspect has been charged with the following violations of the San Andreas Penal Code:");
+    
+    if (charges.length > 0) {
+      charges.forEach(({ charge, count }) => {
+        lines.push(`- ${charge.title} ${count > 1 ? `(x${count})` : ''}`);
+      });
+    } else {
+      lines.push("- (No formal charges recorded)");
+    }
+
+    lines.push(`\nFINAL DISPOSITION: ${reducedMonths} Months, Total Fine of ${formatCurrency(reducedFine)}.`);
+
+    return lines.join('\n');
+  }, [scenarioState, charges, reducedMonths, reducedFine, currentReduction, reductionTarget, isGuiltyPlea, hasLawyer, isCommandApproved]);
 
   const copyNarrativeToClipboard = () => {
     navigator.clipboard.writeText(narrative);
@@ -163,7 +283,6 @@ ${reductionLine}
           </div>
         </div>
 
-        {/* Sentencing Totals - More compact grid */}
         <div className="grid grid-cols-2 gap-3">
           <div className="bg-slate-900 p-3 rounded-lg border border-slate-700 relative overflow-hidden">
             <p className="text-[9px] text-slate-500 uppercase tracking-widest font-black mb-0.5">Time (Months)</p>
@@ -191,7 +310,6 @@ ${reductionLine}
           </div>
         </div>
 
-        {/* Reduction System UI - Collapsible & Compact for Mobile */}
         <div className="mt-3 bg-slate-900/40 rounded-lg border border-slate-700/50 overflow-hidden">
           <button 
             onClick={() => setIsModifiersExpanded(!isModifiersExpanded)}
@@ -352,7 +470,7 @@ ${reductionLine}
                   {copiedNarrative ? <><Check size={12} /> Copied</> : <><Copy size={12} /> Copy</>}
                 </button>
              </div>
-             <div className="flex-1 bg-slate-950 border border-slate-700 rounded p-4 font-mono text-xs leading-relaxed text-slate-300 whitespace-pre-wrap select-text">
+             <div className="flex-1 bg-slate-950 border border-slate-700 rounded p-4 font-mono text-xs leading-relaxed text-slate-300 whitespace-pre-wrap select-text overflow-y-auto">
                 {narrative}
              </div>
           </div>
