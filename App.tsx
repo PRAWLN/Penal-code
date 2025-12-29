@@ -204,11 +204,6 @@ export default function App() {
     if (scenarioState.governmentEquipmentPossession) add('possession_of_government_equipment_principal');
 
     // 5. Robberies & High Risk
-    if (incidents.includes('warehouse_robbery')) {
-        if (scenarioState.warehouseStolenGoods) add('aggravated_robbery_principal');
-        else add('aggravated_robbery_accessory');
-    }
-
     if (incidents.includes('bank_truck')) {
        add('aggravated_robbery_principal');
     }
@@ -237,8 +232,8 @@ export default function App() {
         }
     }
 
-    // Robbery/Alarm logic for Comic Store, Money Loan, PDM Alarm
-    if (incidents.includes('comic_store') || incidents.includes('money_loan') || incidents.includes('pdm_alarm')) {
+    // Robbery/Alarm logic for Comic Store, Money Loan, PDM Alarm, Warehouse Robbery
+    if (incidents.includes('comic_store') || incidents.includes('money_loan') || incidents.includes('pdm_alarm') || incidents.includes('warehouse_robbery')) {
         const participated = scenarioState.robberyStolenGoods;
         const injured = scenarioState.robberyInjury;
         
@@ -249,7 +244,11 @@ export default function App() {
                 add('robbery_principal');
             }
         } else {
-            add('robbery_attempted');
+            if (injured) {
+                add('aggravated_robbery_attempted');
+            } else {
+                add('robbery_attempted');
+            }
         }
     }
 

@@ -115,7 +115,7 @@ export const ScenarioSelector: React.FC<ScenarioSelectorProps> = ({
         update.beFirearmUsed = false;
       }
 
-      const alarmIds = ['money_loan', 'comic_store', 'pdm_alarm', 'break_and_enter', 'bank_truck'];
+      const alarmIds = ['money_loan', 'comic_store', 'pdm_alarm', 'break_and_enter', 'bank_truck', 'warehouse_robbery'];
       const remainingAlarms = nextIncidents.filter(i => alarmIds.includes(i));
       if (remainingAlarms.length === 0 && alarmIds.includes(id)) {
           update.hostageCount = '';
@@ -228,7 +228,7 @@ export const ScenarioSelector: React.FC<ScenarioSelectorProps> = ({
   const showHuntingDetails = (isWildlifeMenuSelected && scenarioState.huntingViolation) || isAnimalShot;
   const showFishingDetails = isWildlifeMenuSelected && scenarioState.fishingViolation;
 
-  const robberyAlarmsSelected = scenarioState.incidentType.some(it => ['comic_store', 'pdm_alarm', 'money_loan'].includes(it));
+  const robberyAlarmsSelected = scenarioState.incidentType.some(it => ['comic_store', 'pdm_alarm', 'money_loan', 'warehouse_robbery'].includes(it));
 
   return (
     <div className="flex flex-col h-full space-y-6">
@@ -325,15 +325,13 @@ export const ScenarioSelector: React.FC<ScenarioSelectorProps> = ({
                 </div>
               </div>
 
-              {scenarioState.robberyStolenGoods && (
-                <div className="space-y-2 animate-in slide-in-from-top-1">
-                  <span className="text-xs text-slate-300 block">Was the victim, a hostage, or a third party injured by a weapon during the robbery?</span>
-                  <div className="flex gap-2">
-                    <button onClick={() => onUpdate({ robberyInjury: true })} className={`flex-1 py-1.5 text-xs font-bold rounded transition-colors ${scenarioState.robberyInjury ? 'bg-red-600 text-white' : 'bg-slate-900 text-slate-500 border border-slate-700'}`}>Yes</button>
-                    <button onClick={() => onUpdate({ robberyInjury: false })} className={`flex-1 py-1.5 text-xs font-bold rounded transition-colors ${!scenarioState.robberyInjury ? 'bg-slate-700 text-white' : 'bg-slate-900 text-slate-500 border border-slate-700'}`}>No</button>
-                  </div>
+              <div className="space-y-2 animate-in slide-in-from-top-1">
+                <span className="text-xs text-slate-300 block">Was there a victim, a hostage, or a third party injured by a weapon during the robbery?</span>
+                <div className="flex gap-2">
+                  <button onClick={() => onUpdate({ robberyInjury: true })} className={`flex-1 py-1.5 text-xs font-bold rounded transition-colors ${scenarioState.robberyInjury ? 'bg-red-600 text-white' : 'bg-slate-900 text-slate-500 border border-slate-700'}`}>Yes</button>
+                  <button onClick={() => onUpdate({ robberyInjury: false })} className={`flex-1 py-1.5 text-xs font-bold rounded transition-colors ${!scenarioState.robberyInjury ? 'bg-slate-700 text-white' : 'bg-slate-900 text-slate-500 border border-slate-700'}`}>No</button>
                 </div>
-              )}
+              </div>
             </div>
           </div>
         )}
