@@ -265,7 +265,52 @@ export const ScenarioSelector: React.FC<ScenarioSelectorProps> = ({
           </div>
         </div>
 
-        {/* Robbery Alarm Details Card (Comic, PDM, Money Loan) */}
+        {/* Hostage Situation Card */}
+        {showHostageSection && (
+          <div className="mt-4 p-4 bg-slate-800/50 rounded-lg border border-slate-700 animate-in fade-in slide-in-from-top-2 space-y-4">
+             <h4 className="text-sm font-semibold text-blue-400 flex items-center gap-2">
+              <Users size={16} /> Hostage Information
+            </h4>
+            <div className="flex items-center justify-between mb-2">
+               <span className="text-xs text-slate-300">Any hostages taken?</span>
+               <div className="flex bg-slate-900 rounded p-0.5 border border-slate-700">
+                  <button onClick={() => onUpdate({ hasHostages: true })} className={`px-3 py-1 text-[10px] font-bold rounded transition-all ${scenarioState.hasHostages ? 'bg-blue-600 text-white shadow-sm' : 'text-slate-500 hover:text-slate-400'}`}>Yes</button>
+                  <button onClick={() => onUpdate({ hasHostages: false, hostageCount: '' })} className={`px-3 py-1 text-[10px] font-bold rounded transition-all ${!scenarioState.hasHostages ? 'bg-slate-700 text-white shadow-sm' : 'text-slate-500 hover:text-slate-400'}`}>No</button>
+               </div>
+            </div>
+
+            {scenarioState.hasHostages && (
+              <div className="space-y-4 animate-in zoom-in-95">
+                <div className="flex items-center justify-between">
+                   <label className="text-[10px] text-slate-400 uppercase font-bold">Hostage Count</label>
+                   <input 
+                     type="number" 
+                     min="1" 
+                     placeholder="0" 
+                     className="w-20 bg-slate-900 border border-slate-600 rounded px-2 py-1.5 text-xs text-white outline-none focus:border-blue-500"
+                     value={scenarioState.hostageCount}
+                     onChange={(e) => onUpdate({hostageCount: e.target.value === '' ? '' : parseInt(e.target.value)})}
+                   />
+                </div>
+                <div>
+                   <label className="text-[10px] text-slate-400 uppercase font-bold block mb-2">Suspect's Interaction</label>
+                   <div className="flex gap-2">
+                      <button 
+                        onClick={() => onUpdate({ hostageRole: 'principal' })} 
+                        className={`flex-1 py-1.5 text-[10px] font-bold rounded border transition-all ${scenarioState.hostageRole === 'principal' ? 'bg-blue-600 border-blue-400 text-white' : 'bg-slate-900 text-slate-500 border-slate-700'}`}
+                      >Held Hostage (Principal)</button>
+                      <button 
+                        onClick={() => onUpdate({ hostageRole: 'accessory' })} 
+                        className={`flex-1 py-1.5 text-[10px] font-bold rounded border transition-all ${scenarioState.hostageRole === 'accessory' ? 'bg-slate-700 border-slate-600 text-slate-300' : 'bg-slate-900 text-slate-500 border-slate-700'}`}
+                      >At Scene (Accessory)</button>
+                   </div>
+                </div>
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* Robbery Alarm Details Card */}
         {robberyAlarmsSelected && (
           <div className="mt-4 p-4 bg-slate-800/50 rounded-lg border border-slate-700 animate-in fade-in slide-in-from-top-2 space-y-4">
              <h4 className="text-sm font-semibold text-blue-400 flex items-center gap-2">
@@ -273,7 +318,7 @@ export const ScenarioSelector: React.FC<ScenarioSelectorProps> = ({
             </h4>
             <div className="space-y-5">
               <div className="space-y-2">
-                <span className="text-xs text-slate-300 block">Did the suspect participate in the robbery or found with stolen goods?</span>
+                <span className="text-xs text-slate-300 block">Did the suspect participate at any stage in the robbing / robbery or found with stolen goods?</span>
                 <div className="flex gap-2">
                   <button onClick={() => onUpdate({ robberyStolenGoods: true })} className={`flex-1 py-1.5 text-xs font-bold rounded transition-colors ${scenarioState.robberyStolenGoods ? 'bg-blue-600 text-white' : 'bg-slate-900 text-slate-500 border border-slate-700'}`}>Yes</button>
                   <button onClick={() => onUpdate({ robberyStolenGoods: false })} className={`flex-1 py-1.5 text-xs font-bold rounded transition-colors ${!scenarioState.robberyStolenGoods ? 'bg-slate-700 text-white' : 'bg-slate-900 text-slate-500 border border-slate-700'}`}>No</button>
@@ -585,51 +630,6 @@ export const ScenarioSelector: React.FC<ScenarioSelectorProps> = ({
           </div>
         )}
 
-        {/* Hostage Situation Card */}
-        {showHostageSection && (
-          <div className="mt-4 p-4 bg-slate-800/50 rounded-lg border border-slate-700 animate-in fade-in slide-in-from-top-2 space-y-4">
-             <h4 className="text-sm font-semibold text-blue-400 flex items-center gap-2">
-              <Users size={16} /> Hostage Information
-            </h4>
-            <div className="flex items-center justify-between mb-2">
-               <span className="text-xs text-slate-300">Any hostages taken?</span>
-               <div className="flex bg-slate-900 rounded p-0.5 border border-slate-700">
-                  <button onClick={() => onUpdate({ hasHostages: true })} className={`px-3 py-1 text-[10px] font-bold rounded transition-all ${scenarioState.hasHostages ? 'bg-blue-600 text-white shadow-sm' : 'text-slate-500 hover:text-slate-400'}`}>Yes</button>
-                  <button onClick={() => onUpdate({ hasHostages: false, hostageCount: '' })} className={`px-3 py-1 text-[10px] font-bold rounded transition-all ${!scenarioState.hasHostages ? 'bg-slate-700 text-white shadow-sm' : 'text-slate-500 hover:text-slate-400'}`}>No</button>
-               </div>
-            </div>
-
-            {scenarioState.hasHostages && (
-              <div className="space-y-4 animate-in zoom-in-95">
-                <div className="flex items-center justify-between">
-                   <label className="text-[10px] text-slate-400 uppercase font-bold">Hostage Count</label>
-                   <input 
-                     type="number" 
-                     min="1" 
-                     placeholder="0" 
-                     className="w-20 bg-slate-900 border border-slate-600 rounded px-2 py-1.5 text-xs text-white outline-none focus:border-blue-500"
-                     value={scenarioState.hostageCount}
-                     onChange={(e) => onUpdate({hostageCount: e.target.value === '' ? '' : parseInt(e.target.value)})}
-                   />
-                </div>
-                <div>
-                   <label className="text-[10px] text-slate-400 uppercase font-bold block mb-2">Suspect's Interaction</label>
-                   <div className="flex gap-2">
-                      <button 
-                        onClick={() => onUpdate({ hostageRole: 'principal' })} 
-                        className={`flex-1 py-1.5 text-[10px] font-bold rounded border transition-all ${scenarioState.hostageRole === 'principal' ? 'bg-blue-600 border-blue-400 text-white' : 'bg-slate-900 text-slate-500 border-slate-700'}`}
-                      >Held Hostage (Principal)</button>
-                      <button 
-                        onClick={() => onUpdate({ hostageRole: 'accessory' })} 
-                        className={`flex-1 py-1.5 text-[10px] font-bold rounded border transition-all ${scenarioState.hostageRole === 'accessory' ? 'bg-slate-700 border-slate-600 text-slate-300' : 'bg-slate-900 text-slate-500 border-slate-700'}`}
-                      >At Scene (Accessory)</button>
-                   </div>
-                </div>
-              </div>
-            )}
-          </div>
-        )}
-
         {/* Drug Trafficking Details */}
         {scenarioState.incidentType.includes('drug_trafficking_incident') && (
           <div className="mt-4 p-4 bg-slate-800/50 rounded-lg border border-slate-700 animate-in fade-in slide-in-from-top-2 space-y-4">
@@ -898,7 +898,7 @@ export const ScenarioSelector: React.FC<ScenarioSelectorProps> = ({
                 <div className="flex flex-col gap-3 mb-3">
                   <span className="text-sm font-medium text-slate-200">Was an officer attacked?</span>
                   <div className="flex gap-2">
-                    <button onClick={() => onUpdate({ officerAttack: false, officerAttackCountWeapon: '', officerAttackCountNoWeapon: '', officerAttackCountTargeted: '', officerAttackGSR: true })} className={`flex-1 py-2 text-xs font-bold rounded transition-colors ${!scenarioState.officerAttack ? 'bg-slate-600 text-white' : 'bg-slate-900 text-slate-400 border border-slate-700'}`}>No</button>
+                    <button onClick={() => onUpdate({ officerAttack: false, officerAttackCountWeapon: '', officerAttackCountNoWeapon: '', officerAttackCountTargeted: '', officerAttackGSR: true })} className={`flex-1 py-2 text-xs font-bold rounded transition-colors ${!scenarioState.officerAttack ? 'bg-blue-600 text-white' : 'bg-slate-900 text-slate-400 border border-slate-700'}`}>No</button>
                     <button onClick={() => onUpdate({ officerAttack: true })} className={`flex-1 py-2 text-xs font-bold rounded transition-colors ${scenarioState.officerAttack ? 'bg-red-600 text-white' : 'bg-slate-900 text-slate-400 border border-slate-700'}`}>Yes</button>
                   </div>
                 </div>

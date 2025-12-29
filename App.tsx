@@ -248,8 +248,9 @@ export default function App() {
             } else {
                 add('robbery_principal');
             }
+        } else {
+            add('robbery_attempted');
         }
-        // If participated is No, add no charge as per user request.
     }
 
     if (incidents.includes('drug_trafficking_incident')) {
@@ -432,7 +433,7 @@ export default function App() {
 
   return (
     <div className="flex flex-col h-screen bg-slate-900 text-slate-100 overflow-hidden">
-      <header className="flex-none h-16 bg-slate-900 border-b border-slate-700 flex items-center justify-between px-6 z-20 shadow-lg">
+      <header className="flex-none h-16 bg-slate-900 border-b border-slate-700 flex items-center justify-between px-6 z-[60] shadow-lg">
         <div className="flex items-center gap-3">
           <div className="bg-blue-600 p-2 rounded-lg"><Shield className="text-white w-6 h-6" /></div>
           <div>
@@ -444,7 +445,7 @@ export default function App() {
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500 w-4 h-4" />
           <input type="text" placeholder="Search Penal Code..." value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} className="w-full bg-slate-800 border border-slate-700 rounded-full py-2 pl-10 pr-4 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 placeholder-slate-500" />
           {searchTerm && (
-            <div className="absolute top-12 left-0 w-full bg-slate-800 border border-slate-600 rounded-lg shadow-2xl max-h-60 overflow-y-auto p-2 z-50">
+            <div className="absolute top-12 left-0 w-full bg-slate-800 border border-slate-600 rounded-lg shadow-2xl max-h-60 overflow-y-auto p-2 z-[70]">
                {filteredPenalCode.map(c => (
                  <button key={c.id} onClick={() => { handleManualAdd(c.id); setSearchTerm(''); }} className="w-full text-left p-2 hover:bg-slate-700 rounded flex justify-between items-center group">
                    <span className="text-sm font-medium">{c.code ? `${c.code} - ` : ''}{c.title}</span>
@@ -454,14 +455,14 @@ export default function App() {
             </div>
           )}
         </div>
-        <button className="md:hidden text-slate-300" onClick={() => setIsSidebarOpen(!isSidebarOpen)}>{isSidebarOpen ? <X /> : <Menu />}</button>
+        <button className="md:hidden text-slate-300 relative z-[70]" onClick={() => setIsSidebarOpen(!isSidebarOpen)}>{isSidebarOpen ? <X /> : <Menu />}</button>
       </header>
 
       <main className="flex-1 flex overflow-hidden relative">
-        <div className={`absolute inset-y-0 left-0 w-full md:relative md:w-5/12 lg:w-1/3 bg-slate-900 border-r border-slate-700 p-6 overflow-y-auto transition-transform duration-300 z-10 ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0'}`}>
+        <div className={`absolute inset-y-0 left-0 w-full md:relative md:w-5/12 lg:w-1/3 bg-slate-900 border-r border-slate-700 p-6 overflow-y-auto transition-transform duration-300 z-50 shadow-2xl md:shadow-none ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0'}`}>
            <ScenarioSelector scenarioState={scenarioState} onUpdate={handleScenarioUpdate} />
         </div>
-        <div className="flex-1 bg-slate-950 p-4 md:p-6 lg:p-8 overflow-hidden">
+        <div className="flex-1 bg-slate-950 p-4 md:p-6 lg:p-8 overflow-hidden z-0">
           <div className="h-full max-w-4xl mx-auto">
             <ChargeList charges={activeCharges} onRemoveCharge={handleRemoveCharge} scenarioState={scenarioState} />
           </div>

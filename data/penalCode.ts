@@ -1,4 +1,3 @@
-
 import { Charge, ChargeCategory } from '../types';
 
 export const PENAL_CODE: Charge[] = [
@@ -910,7 +909,7 @@ export const PENAL_CODE: Charge[] = [
     burdenOfProof: "The taking of personal property without consent\nThe item was taken from another person, business, residence or vehicle\nUse of force or fear",
     months: 20,
     fine: 1600,
-    category: ChargeCategory.MISDEMEANOR
+    category: ChargeCategory.FELONY
   },
   {
     id: "robbery_accessory",
@@ -920,7 +919,7 @@ export const PENAL_CODE: Charge[] = [
     burdenOfProof: "The taking of personal property without consent\nThe item was taken from another person, business, residence or vehicle\nUse of force or fear",
     months: 15,
     fine: 1200,
-    category: ChargeCategory.MISDEMEANOR
+    category: ChargeCategory.FELONY
   },
   {
     id: "robbery_attempted",
@@ -930,7 +929,7 @@ export const PENAL_CODE: Charge[] = [
     burdenOfProof: "The taking of personal property without consent\nThe item was taken from another person, business, residence or vehicle\nUse of force or fear",
     months: 10,
     fine: 1000,
-    category: ChargeCategory.MISDEMEANOR
+    category: ChargeCategory.FELONY
   },
   {
     id: "robbery_conspiracy",
@@ -940,7 +939,7 @@ export const PENAL_CODE: Charge[] = [
     burdenOfProof: "The taking of personal property without consent\nThe item was taken from another person, business, residence or vehicle\nUse of force or fear",
     months: 5,
     fine: 800,
-    category: ChargeCategory.MISDEMEANOR
+    category: ChargeCategory.FELONY
   },
   {
     id: "aggravated_robbery_principal",
@@ -1356,7 +1355,7 @@ export const PENAL_CODE: Charge[] = [
     id: "hunting_over_limits_principal_1",
     code: "",
     title: "Hunting Over Limits",
-    description: "Any person found hunting over the bag limit in designated hunting areas. (60+)",
+    description: "Any person found hunting over the_bag limit in designated hunting areas. (60+)",
     burdenOfProof: "Found in possession of 41 or more units of unprocessed meats\nFound with all necessary materials needed to go hunting\nIs not part of a transportation company or meat service industry",
     months: 10,
     fine: 3000,
@@ -1366,7 +1365,7 @@ export const PENAL_CODE: Charge[] = [
     id: "hunting_over_limits_principal_2",
     code: "",
     title: "Hunting Over Limits",
-    description: "Any person found hunting over the bag limit in designated hunting areas. (50+)",
+    description: "Any person found hunting over the_bag limit in designated hunting areas. (50+)",
     burdenOfProof: "Found in possession of 41 or more units of unprocessed meats\nFound with all necessary materials needed to go hunting\nIs not part of a transportation company or meat service industry",
     months: 0,
     fine: 2000,
@@ -1376,7 +1375,7 @@ export const PENAL_CODE: Charge[] = [
     id: "hunting_over_limits_principal_3",
     code: "",
     title: "Hunting Over Limits",
-    description: "Any person found hunting over the bag limit in designated hunting areas. (41+)",
+    description: "Any person found hunting over the_bag limit in designated hunting areas. (41+)",
     burdenOfProof: "Found in possession of 41 or more units of unprocessed meats\nFound with all necessary materials needed to go hunting\nIs not part of a transportation company or meat service industry",
     months: 0,
     fine: 1000,
@@ -1857,7 +1856,7 @@ export const PENAL_CODE: Charge[] = [
     code: "",
     title: "Possession with Intent to Distribute (Marijuana) (Accessory)",
     description: "Any person who has aided anyone found to have large quantities of controlled substances on their person, vehicle or property.",
-    burdenOfProof: " Possess large quantity of controlled substances\n40 or more Marijuana joints\nOR\n5 or more Weed plants/seeds\nOR\nThe defendant is in possession of a weed brick.\n Inferred distribution through circumstance of discovery, pattern of behavior, large sums of money, high grade weaponry, or measuring/packing paraphernalia",
+    burdenOfProof: " Possess large quantity of controlled substances\n40 or more Marijuana joints\nOR\n5 or more Weed plants/seeds\nOR\nThe defendant is in possession of a_weed brick.\n Inferred distribution through circumstance of discovery, pattern of behavior, large sums of money, high grade weaponry, or measuring/packing paraphernalia",
     months: 20,
     fine: 4000,
     category: ChargeCategory.FELONY
@@ -1867,7 +1866,7 @@ export const PENAL_CODE: Charge[] = [
     code: "",
     title: "Possession with Intent to Distribute (Marijuana) (Conspiracy)",
     description: "The planning or preparation which has involved physical steps to acquire or arrange the distribution of large quantities of controlled substances.",
-    burdenOfProof: " Possess large quantity of controlled substances\n40 or more Marijuana joints\nOR\n5 or more Weed plants/seeds\nOR\nThe defendant is in possession of a weed brick.\n Inferred distribution through circumstance of discovery, pattern of behavior, large sums of money, high grade weaponry, or measuring/packing paraphernalia",
+    burdenOfProof: " Possess large quantity of controlled substances\n40 or more Marijuana joints\nOR\n5 or more Weed plants/seeds\nOR\nThe defendant is in possession of a_weed brick.\n Inferred distribution through circumstance of discovery, pattern of behavior, large sums of money, high grade weaponry, or measuring/packing paraphernalia",
     months: 15,
     fine: 3500,
     category: ChargeCategory.FELONY
